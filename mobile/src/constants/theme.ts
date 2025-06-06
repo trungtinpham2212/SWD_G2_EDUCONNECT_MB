@@ -16,7 +16,7 @@ export const lightTheme: CustomTheme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
-    primary: '#6200ee',
+    primary: '#2563eb',
     background: '#f5f5f5',
     surface: '#ffffff',
     onBackground: '#333333',
@@ -30,7 +30,7 @@ export const darkTheme: CustomTheme = {
   ...MD3DarkTheme,
   colors: {
     ...MD3DarkTheme.colors,
-    primary: '#bb86fc',
+    primary: '#aaadf7',
     background: '#121212',
     surface: '#1e1e1e',
     onBackground: '#e0e0e0',

@@ -1,0 +1,8 @@
+export const COLORS = {
+    THEME_LINK_COLOR_TABLE : "#ffc500",
+    BACKGROUND_HEADER_HOME: "#1E0C1A",
+    BACKGROUND_CONTENT_HOME: "#291926",
+    WHITE_TEXT : "#f5f5f5",
+    MAIN_APP_COLOR: "#2563eb",
+
+}

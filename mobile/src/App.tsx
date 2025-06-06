@@ -1,5 +1,5 @@
 import { FONTS } from '@/constants/fonts';
-import LoginScreen from '@/features/auth/LoginScreen';
+import LoginScreen from '@/features/auth/screen/LoginScreen';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { useContext, useEffect } from 'react';

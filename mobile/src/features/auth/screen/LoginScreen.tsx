@@ -1,10 +1,13 @@
 import React, { useContext, useState } from 'react';
-import { View, StyleSheet, Alert, KeyboardAvoidingView, ScrollView, Switch, Platform } from 'react-native';
+import { View, StyleSheet, Alert, KeyboardAvoidingView, Switch, Platform } from 'react-native';
 import { TextInput, Button, Text, IconButton, useTheme } from 'react-native-paper';
 import { useForm, Controller } from 'react-hook-form';
 import MainLayout from '@/layouts/MainLayout';
 import { ThemeContext } from '@/context/ThemeContext';
 import { Feather } from '@expo/vector-icons';
+import {FONTS} from '@/constants/fonts';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { COLORS } from '@/constants/colors';
 
 interface FormData {
   username: string;
@@ -30,9 +33,11 @@ const LoginScreen = () => {
       <MainLayout>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={[styles.container, { backgroundColor: theme.colors.surface }]}
-        >
-
+        > 
           <View style={styles.innerContainer}>
+            <View style={{marginBottom: 10 }}>
+              <FontAwesome5 name="graduation-cap" size={60} color={COLORS.MAIN_APP_COLOR} />
+            </View>
             <Text variant="headlineLarge" style={[styles.title, { color: (theme.colors as any).titleBig }]}>
               Welcome to EduConnect
             </Text>
@@ -100,7 +105,7 @@ const LoginScreen = () => {
               onPress={handleSubmit(onSubmit)}
               style={styles.button}
               contentStyle={styles.buttonContent}
-              labelStyle={{ color: '#000' }}
+              labelStyle={{ color: '#fff' }}
             >
               Sign in
             </Button>
@@ -128,8 +133,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
-  innerContainer: {
-    // flex: 1,
+  innerContainer: { 
     paddingHorizontal: 24,
     transform: [{ translateY: -20 }],
   },
@@ -138,15 +142,15 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     fontWeight: 'bold',
     fontSize: 40,
+    fontFamily: FONTS.OPENSANS_REGULAR
   },
   subtitle: {
     textAlign: 'left',
-    marginBottom: 32,
-    color: '#666',
+    marginBottom: 32, 
+    fontFamily: FONTS.OPENSANS_REGULAR
   },
   input: {
-    marginBottom: 12,
-    // backgroundColor: '#fff',
+    marginBottom: 12, 
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -165,7 +169,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 16,
     borderRadius: 8,
-    backgroundColor: '#4bfcff',
+    backgroundColor: COLORS.MAIN_APP_COLOR
   },
   buttonContent: {
     paddingVertical: 8,

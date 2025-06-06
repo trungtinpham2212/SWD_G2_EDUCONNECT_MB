@@ -1,16 +1,15 @@
 import { ReactNode, useCallback, useContext, useEffect } from "react";
-import { StatusBar, StyleSheet, View } from "react-native";
+import { Keyboard, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemeContext } from '@/context/ThemeContext';
-import { useTheme } from "react-native-paper";
-import { useFocusEffect } from "@react-navigation/native";
+import { useTheme } from "react-native-paper"; 
 
 
 type MainLayoutProps = {
-    children: React.ReactNode; 
+    children: React.ReactNode;
 };
 
-const MainLayout = ({ children }: MainLayoutProps) => { 
+const MainLayout = ({ children }: MainLayoutProps) => {
     const theme = useTheme();
 
     useEffect(() => {
@@ -20,11 +19,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
     return (
         <>
-            <SafeAreaView style={[styles.safeArea, { flex: 1 }]}>
-                <View style={styles.container}> 
-                    {children}
-                </View>
-            </SafeAreaView>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <SafeAreaView style={[styles.safeArea, { flex: 1 }]}>
+                    <View style={styles.container}>
+                        {children}
+                    </View>
+                </SafeAreaView>
+            </TouchableWithoutFeedback>
         </>
     );
 };
