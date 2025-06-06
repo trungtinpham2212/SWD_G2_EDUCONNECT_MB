@@ -5,17 +5,15 @@ import { useForm, Controller } from 'react-hook-form';
 import MainLayout from '@/layouts/MainLayout';
 import { ThemeContext } from '@/context/ThemeContext';
 import { Feather } from '@expo/vector-icons';
-import {FONTS} from '@/constants/fonts';
+import { FONTS } from '@/constants/fonts';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { COLORS } from '@/constants/colors';
-
-interface FormData {
-  username: string;
-  password: string;
-}
+import { FormLoginRequest } from '@/features/auth/types/index';
+import { loginService } from '@/features/auth/services/authService';
+import { storeToken } from '@/features/auth/storage/authStorage';
 
 const LoginScreen = () => {
-  const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { control, handleSubmit, formState: { errors } } = useForm<FormLoginRequest>({
     defaultValues: {
       username: '',
       password: '',
@@ -25,17 +23,24 @@ const LoginScreen = () => {
   const [errorResponse, setErrorResponse] = useState<string | null>(null);
   const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
   const theme = useTheme();
-  const onSubmit = (data: FormData) => {
-    Alert.alert('Đăng nhập', `Email: ${data.username}\nMật khẩu: ${data.password}`);
+  const onSubmit = async (data: FormLoginRequest) => {
+    const res = await loginService(data);
+
+    if (res.success) {
+      await storeToken(res.data.token);
+      // navigation.replace('MainTab');
+    } else { 
+      setErrorResponse(res.message);
+    }
   };
   return (
     <>
       <MainLayout>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={[styles.container, { backgroundColor: theme.colors.surface }]}
-        > 
+        >
           <View style={styles.innerContainer}>
-            <View style={{marginBottom: 10 }}>
+            <View style={{ marginBottom: 10 }}>
               <FontAwesome5 name="graduation-cap" size={60} color={COLORS.MAIN_APP_COLOR} />
             </View>
             <Text variant="headlineLarge" style={[styles.title, { color: (theme.colors as any).titleBig }]}>
@@ -110,7 +115,7 @@ const LoginScreen = () => {
               Sign in
             </Button>
           </View>
-          <View style={styles.themeToggleContainer}> 
+          <View style={styles.themeToggleContainer}>
             {isDarkTheme ? <Feather name="moon" size={24} color="white" /> : <Feather name="sun" size={24} color="black" />}
 
             <Switch
@@ -133,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
-  innerContainer: { 
+  innerContainer: {
     paddingHorizontal: 24,
     transform: [{ translateY: -20 }],
   },
@@ -146,11 +151,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: 'left',
-    marginBottom: 32, 
+    marginBottom: 32,
     fontFamily: FONTS.OPENSANS_REGULAR
   },
   input: {
-    marginBottom: 12, 
+    marginBottom: 12,
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -164,7 +169,7 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: 'absolute',
     right: 8,
-    top: 6, 
+    top: 6,
   },
   button: {
     marginTop: 16,
