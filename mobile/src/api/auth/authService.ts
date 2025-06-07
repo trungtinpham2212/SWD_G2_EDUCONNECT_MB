@@ -1,6 +1,9 @@
-import { FormLoginRequest, LoginResponse } from '@/features/auth/types/index';
+import { FormLoginRequest, LoginResponse } from '@/api/auth/authTypes';
+import axiosInstance from '@/api/axiosConfig';
+
 
 export const loginService = async(data:FormLoginRequest): Promise<LoginResponse> =>{
+    // const response = await axiosInstance.post('/auth/login', data);
     if(data.username === 'admin' && data.password === '@a'){
         const kwt = 'tooooken';
         const res: LoginResponse = {

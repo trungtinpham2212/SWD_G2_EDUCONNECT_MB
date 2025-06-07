@@ -12,7 +12,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth phải dùng trong AuthProvider');
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const authenticated = await isAuthenticated();
       setIsLoggedIn(authenticated);
     } catch (error) {
-      console.error('Lỗi check auth:', error);
+      console.error('Error check auth:', error);
       setIsLoggedIn(false);
     } finally {
       setIsLoading(false);
@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (token: string) => {
     await storeToken(token);
-    setIsLoggedIn(true); // Tự động trigger re-render
+    setIsLoggedIn(true);  
   };
 
   const logout = async () => {

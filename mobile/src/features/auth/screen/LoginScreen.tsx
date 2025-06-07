@@ -7,19 +7,15 @@ import { ThemeContext } from '@/context/ThemeContext';
 import { Feather } from '@expo/vector-icons';
 import { FONTS } from '@/constants/fonts';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { COLORS } from '@/constants/colors';
-import { FormLoginRequest } from '@/features/auth/types/index';
-import { loginService } from '@/features/auth/services/authService';
-import { storeToken } from '@/features/auth/storage/authStorage';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { COLORS } from '@/constants/colors'; 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/types/navigation';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { FormLoginRequest, loginService } from '@/api';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const LoginScreen = () => {
-  const navigation = useNavigation<NavigationProp>();
+const LoginScreen = () => { 
   const { control, handleSubmit, formState: { errors } } = useForm<FormLoginRequest>({
     defaultValues: {
       username: '',
@@ -41,7 +37,7 @@ const LoginScreen = () => {
         setErrorResponse(res.message);
       }
     } catch (error) {
-      Alert.alert('Lỗi', 'Đăng nhập thất bại');
+      Alert.alert('Error', 'Login Failed');
     }
   };
   return (

@@ -1,15 +1,11 @@
 import MainLayout from "@/layouts/MainLayout";
-import { Alert, Button, StyleSheet, Text, View } from "react-native";
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/types/navigation';
-import { removeToken } from "@/features/auth/storage/authStorage";
-import { CommonActions, useNavigation } from "@react-navigation/native";
+import { Alert, Button, StyleSheet, Text, View } from "react-native"; 
 import { useAuth } from "@/features/auth/context/AuthContext";
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+import { useTheme } from "react-native-paper";
+ 
 
 const HomeScreen: React.FC = () => {
-    const navigation = useNavigation<NavigationProp>();
+      const theme = useTheme(); 
     const { logout } = useAuth();
     const handleLogout = async () => {
     try {
@@ -21,7 +17,7 @@ const HomeScreen: React.FC = () => {
   };
     return (
         <MainLayout>
-            <View style={styles.container}>
+            <View style={[styles.container, {backgroundColor: theme.colors.surface}]}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text>Settings Screen</Text>
                     <Button title="Logout" onPress={handleLogout} />
