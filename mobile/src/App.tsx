@@ -1,5 +1,4 @@
 import { FONTS } from '@/constants/fonts';
-import LoginScreen from '@/features/auth/screen/LoginScreen';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { useContext, useEffect } from 'react';
@@ -7,6 +6,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { ThemeProvider, ThemeContext } from '@/context/ThemeContext';
 import { lightTheme, darkTheme } from '@/constants/theme';
+import RootNavigator from '@/navigation/RootNavigator';
+import { AuthProvider } from './features/auth/context/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,7 +18,9 @@ function AppContent() {
   return (
     <PaperProvider theme={selectedTheme}>
       <SafeAreaProvider>
-        <LoginScreen />
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
       </SafeAreaProvider>
     </PaperProvider>
   );

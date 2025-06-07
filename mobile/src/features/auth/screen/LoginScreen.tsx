@@ -11,8 +11,15 @@ import { COLORS } from '@/constants/colors';
 import { FormLoginRequest } from '@/features/auth/types/index';
 import { loginService } from '@/features/auth/services/authService';
 import { storeToken } from '@/features/auth/storage/authStorage';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/types/navigation';
+import { useAuth } from '@/features/auth/context/AuthContext';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const LoginScreen = () => {
+  const navigation = useNavigation<NavigationProp>();
   const { control, handleSubmit, formState: { errors } } = useForm<FormLoginRequest>({
     defaultValues: {
       username: '',
@@ -23,14 +30,18 @@ const LoginScreen = () => {
   const [errorResponse, setErrorResponse] = useState<string | null>(null);
   const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
   const theme = useTheme();
+  const { login } = useAuth();
   const onSubmit = async (data: FormLoginRequest) => {
     const res = await loginService(data);
-
-    if (res.success) {
-      await storeToken(res.data.token);
-      // navigation.replace('MainTab');
-    } else { 
-      setErrorResponse(res.message);
+    try {
+      const res = await loginService(data); 
+      if (res.success) {
+        await login(res.data.token);  
+      } else {
+        setErrorResponse(res.message);
+      }
+    } catch (error) {
+      Alert.alert('Lỗi', 'Đăng nhập thất bại');
     }
   };
   return (
