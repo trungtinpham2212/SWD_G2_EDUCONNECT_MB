@@ -4,13 +4,19 @@ import HomeScreen from '@/features/home/screen/HomeScreen';
 import { BottomTabParamList } from '@/types/navigation';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {COLORS} from '@/constants/colors';
+import AcademicScreen from '@/features/academic/screens/AcademicScreen';
+import SettingScreen from '@/features/setting/screens/SettingScreen';
+import CustomTabButton from '@/components/CustomTabButton';
+
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        tabBarButton: (props) => <CustomTabButton {...props} />,
         headerShown: false,
         tabBarActiveTintColor: COLORS.THEME_LINK_COLOR_TABLE,
         tabBarInactiveTintColor: '#f5f5f5',
@@ -30,13 +36,10 @@ const BottomTabNavigator = () => {
           switch (route.name) { 
             case 'Home':
               return <FontAwesome5 name="home" size={size} color={color} />;
+            case 'Academic':
+              return <MaterialIcons name="menu-book" size={size} color={color} />  
             case 'Settings':
-              return <AntDesign name="setting" size={24} color={color} />  
-            // nếu có thêm tab khác, ở đây
-            // case 'Chat':
-            //   return <FontAwesome5 name="comments" size={size} color={color} />;
-            // case 'Settings':
-            //   return <FontAwesome5 name="cog" size={size} color={color} />;
+              return <AntDesign name="setting" size={24} color={color} />   
             default:
               return null;
           }
@@ -51,8 +54,15 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
+        name='Academic'
+        component={AcademicScreen}
+        options={{
+          tabBarLabel: 'Academic'
+        }}
+      />
+      <Tab.Screen
         name="Settings"
-        component={HomeScreen}
+        component={SettingScreen}
         options={{
           tabBarLabel: 'Settings',
         }}

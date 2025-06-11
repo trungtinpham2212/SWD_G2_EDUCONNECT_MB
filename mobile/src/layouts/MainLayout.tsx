@@ -1,7 +1,6 @@
-import { ReactNode, useCallback, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { Keyboard, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ThemeContext } from '@/context/ThemeContext';
+import { SafeAreaView } from "react-native-safe-area-context"; 
 import { useTheme } from "react-native-paper"; 
 
 

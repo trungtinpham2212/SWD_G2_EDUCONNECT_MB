@@ -1,0 +1,4 @@
+export const SIZES = {
+    DISTANCE_MAIN_POSITIVE: 15,
+    DISTANCE_MAIN_NEGATIVE: -15,
+}
