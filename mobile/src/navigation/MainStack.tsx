@@ -3,7 +3,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTabNavigator from '@/navigation/BottomTabNavigator';
 import { MainStackParamList } from '@/types/navigation';
-import ParentScheduleScreen from '@/features/schedule/teacher/ParentScheduleScreen';
+import ParentScheduleScreen from '@/features/schedule/parent/ParentScheduleScreen';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
