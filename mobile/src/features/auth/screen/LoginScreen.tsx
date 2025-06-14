@@ -8,12 +8,12 @@ import { Feather } from '@expo/vector-icons';
 import { FONTS } from '@/constants/fonts';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { COLORS } from '@/constants/colors'; 
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/types/navigation';
+// import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+// import { RootStackParamList } from '@/types/navigation';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { FormLoginRequest, loginService } from '@/api';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+// type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 
 
 const LoginScreen = () => { 
   const { control, handleSubmit, formState: { errors } } = useForm<FormLoginRequest>({
@@ -27,8 +27,7 @@ const LoginScreen = () => {
   const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
   const theme = useTheme();
   const { login } = useAuth();
-  const onSubmit = async (data: FormLoginRequest) => {
-    const res = await loginService(data);
+  const onSubmit = async (data: FormLoginRequest) => { 
     try {
       const res = await loginService(data); 
       if (res.success) {

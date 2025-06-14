@@ -11,7 +11,7 @@ export type AuthStackParamList = {
 
 export type MainStackParamList = {
   BottomTabs: undefined;
-  ExamSchedule: undefined;
+  ParentSchedule: undefined;
 };
 
 export type BottomTabParamList = {

@@ -1,5 +1,5 @@
 
-export interface FormLoginRequest {
+export type FormLoginRequest = {
   username: string;
   password: string;
 }

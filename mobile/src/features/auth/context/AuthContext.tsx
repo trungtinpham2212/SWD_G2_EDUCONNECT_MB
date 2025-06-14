@@ -20,8 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check auth khi app khởi động
+  useEffect(() => { 
     checkAuthStatus();
   }, []);
 

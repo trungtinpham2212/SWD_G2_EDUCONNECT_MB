@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Keyboard, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"; 
-import { useTheme } from "react-native-paper"; 
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "react-native-paper";
 
 
 type MainLayoutProps = {
@@ -17,15 +17,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     }, [theme]);
 
     return (
-        <>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <SafeAreaView style={[styles.safeArea, { flex: 1 }]}>
-                    <View style={styles.container}>
-                        {children}
-                    </View>
-                </SafeAreaView>
-            </TouchableWithoutFeedback>
-        </>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <SafeAreaView style={[styles.safeArea, { flex: 1 }]}>
+                <View style={styles.container}>
+                    {children}
+                </View>
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
     );
 };
 export default MainLayout;

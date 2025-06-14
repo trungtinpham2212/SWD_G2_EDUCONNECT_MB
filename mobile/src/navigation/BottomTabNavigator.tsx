@@ -1,12 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from '@/features/home/screen/HomeScreen';
+import ParentHomeScreen from '@/features/home/parent/ParentHomeScreen';
 import { BottomTabParamList } from '@/types/navigation';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import {COLORS} from '@/constants/colors';
-import AcademicScreen from '@/features/academic/screens/AcademicScreen';
+import {COLORS} from '@/constants/colors'; 
 import SettingScreen from '@/features/setting/screens/SettingScreen';
 import CustomTabButton from '@/components/CustomTabButton';
 
@@ -48,18 +47,11 @@ const BottomTabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={ParentHomeScreen}
         options={{
           tabBarLabel: 'Home',
         }}
-      />
-      <Tab.Screen
-        name='Academic'
-        component={AcademicScreen}
-        options={{
-          tabBarLabel: 'Academic'
-        }}
-      />
+      /> 
       <Tab.Screen
         name="Settings"
         component={SettingScreen}
