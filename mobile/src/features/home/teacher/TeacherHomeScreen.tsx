@@ -8,13 +8,15 @@ import Octicons from '@expo/vector-icons/Octicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { MainStackParamList } from "@/types/navigation";
+import { useAuth } from "@/features/auth/context/AuthContext";
 
 const screenWidth = Dimensions.get('window').width;
 const itemWidth = screenWidth - screenWidth * 9 / 100;
 
 
-const ParentHomeScreen: React.FC = () => {
+const TeacherHomeScreen: React.FC = () => {
     const navigation: NavigationProp<MainStackParamList> = useNavigation();
+    const { authState } = useAuth();
 
     const theme = useTheme();
 
@@ -23,7 +25,7 @@ const ParentHomeScreen: React.FC = () => {
             <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
                 <View style={styles.header}>
                     <Text style={[styles.welcomeText, { color: theme.colors.onSurface }]}>
-                        Hello, Ed
+                        Hello, {authState.user?.userName || 'User'}
                     </Text>
                     <TouchableOpacity
                         style={styles.notificationButton}
@@ -35,26 +37,10 @@ const ParentHomeScreen: React.FC = () => {
                 {/* Main Content */}
                 <ScrollView scrollEnabled={true} showsVerticalScrollIndicator={false}>
                     <View style={styles.mainContent}>
-                        <View style={styles.row}>
+                        <View style={styles.row}> 
                             <View style={styles.containBtnNavigation}>
                                 <Pressable
-                                    onPress={() => navigation.navigate('Chatbot')}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <MaterialIcons name="chat-bubble-outline"   size={40} color="#333"/> 
-                                        <Text style={[styles.text]}>Chat With AI</Text>
-                                    </View>
-                                </Pressable>
-                            </View>
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('ParentSchedule')}
+                                    onPress={() => navigation.navigate('TeacherSchedule')}
                                     style={({ pressed }) => [
                                         styles.button,
                                         {
@@ -64,7 +50,7 @@ const ParentHomeScreen: React.FC = () => {
                                 >
                                     <View style={styles.containInsidePress}>
                                         <MaterialCommunityIcons name="timetable" size={40} color="#333" />
-                                        <Text style={[styles.text]}>Schedule</Text>
+                                        <Text style={[styles.text]}>Teacher Schedule</Text>
                                     </View>
                                 </Pressable>
                             </View> 
@@ -112,7 +98,7 @@ const ParentHomeScreen: React.FC = () => {
     );
 };
 
-export default ParentHomeScreen;
+export default TeacherHomeScreen;
 
 const styles = StyleSheet.create({
     container: {

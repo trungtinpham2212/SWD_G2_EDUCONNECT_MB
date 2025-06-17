@@ -24,19 +24,31 @@ const LoginScreen = () => {
   });
   const [secureTextEntry, setSecureTextEntry] = useState<boolean>(true);
   const [errorResponse, setErrorResponse] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
   const theme = useTheme();
   const { login } = useAuth();
-  const onSubmit = async (data: FormLoginRequest) => { 
-    try {
-      const res = await loginService(data); 
-      if (res.success) {
-        await login(res.data.token);  
+  const onSubmit = async (data: FormLoginRequest) => {  
+    try { 
+      setIsLoading(true);
+      const res = await loginService(data);  
+      if ('token' in res) { 
+        await login(res.token, {
+          email: res.email,
+          userName: res.userName,
+          roleId: Number(res.roleId),
+          userId: Number(res.userId),
+          teacherId: res.teacherid
+        });  
       } else {
+        console.log("Login failed:");
         setErrorResponse(res.message);
       }
     } catch (error) {
+      console.log("Login error:", error);
       Alert.alert('Error', 'Login Failed');
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -71,7 +83,7 @@ const LoginScreen = () => {
                   error={!!errors.username}
                   style={styles.input}
                   autoCapitalize="none"
-                  keyboardType="default"
+                  keyboardType="web-search"
                 />
               )}
             />
@@ -117,8 +129,10 @@ const LoginScreen = () => {
               style={styles.button}
               contentStyle={styles.buttonContent}
               labelStyle={{ color: '#fff' }}
+              disabled={isLoading}
+              loading={isLoading}
             >
-              Sign in
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </View>
           <View style={styles.themeToggleContainer}>

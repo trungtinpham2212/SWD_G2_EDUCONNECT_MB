@@ -1,6 +1,8 @@
 // src/types/navigation.ts
 export type RootStackParamList = {
   AuthStack: undefined;
+  TeacherStack: undefined;
+  ParentStack: undefined;
   MainStack: undefined;
 };
 
@@ -12,6 +14,8 @@ export type AuthStackParamList = {
 export type MainStackParamList = {
   BottomTabs: undefined;
   ParentSchedule: undefined;
+  TeacherSchedule: undefined;
+  Chatbot: undefined;
 };
 
 export type BottomTabParamList = {

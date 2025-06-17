@@ -2,33 +2,38 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import MainLayout from "@/layouts/MainLayout";
 import { FC, useContext, useState } from "react";
 import { Alert, Image, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
-import { Appbar, Button, Dialog, Paragraph, Portal, useTheme } from "react-native-paper";
+import { Appbar, Button, Dialog, Portal, useTheme } from "react-native-paper";
 import { SIZES } from "@/constants";
+import { COLORS } from "@/constants/colors";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Feather } from '@expo/vector-icons';
+import { ThemeContext } from '@/context/ThemeContext'; 
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/types/navigation';
 
-import { ThemeContext } from '@/context/ThemeContext';
-
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const SettingScreen: FC = () => {
     const theme = useTheme();
-    const { logout } = useAuth();
+    const { logout, authState } = useAuth();
     const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
-    const [dialogVisible, setDialogVisible] = useState(false);
+    const [dialogVisible, setDialogVisible] = useState(false); 
     const showDialog = () => setDialogVisible(true);
     const hideDialog = () => setDialogVisible(false);
+
     const handleLogout = async () => {
         try {
-            await logout(); // Tự động chuyển về AuthStack
-            // Không cần navigation.reset!
+            await logout(); 
         } catch (error) {
-            Alert.alert('Lỗi', 'Không thể đăng xuất');
+            Alert.alert('Error', 'Failed to logout. Please try again.');
         }
     };
+
     const confirmLogout = () => {
         handleLogout();
         hideDialog();
     };
+
     return (
         <MainLayout>
             <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
@@ -42,7 +47,12 @@ const SettingScreen: FC = () => {
                     <View style={styles.profileContainer}>
                         <Image style={styles.profileAvatar} source={{ uri: 'https://i.pinimg.com/564x/32/25/b1/3225b1ec8c0064fba95d2d84faa79626.jpg' }} />
                         <View>
-                            <Text style={[styles.profileName, { color: theme.colors.onSurface }]}>Dao Ngoc Bui</Text>
+                            <Text style={[styles.profileName, { color: theme.colors.onSurface }]}>
+                                {authState.user?.userName || 'User'}
+                            </Text>
+                            <Text style={[styles.profileEmail, { color: theme.colors.onSurface }]}>
+                                {authState.user?.email || ''}
+                            </Text>
                         </View>
                     </View>
                     <View style={{ marginBottom: 15 }}>
@@ -66,14 +76,12 @@ const SettingScreen: FC = () => {
                                     <View style={[styles.settingItemFront]}>
                                         <Feather name="moon" size={24} color="white" style={{ marginRight: 15 }} />
                                         <Text style={[styles.settingName, { color: theme.colors.onSurface }]}>Dark mode</Text>
-
                                     </View> :
                                     <View style={[styles.settingItemFront]}>
                                         <Feather name="sun" size={24} color="black" style={{ marginRight: 15 }} />
                                         <Text style={[styles.settingName, { color: theme.colors.onSurface }]}>Light mode</Text>
-                                    </View>}
-
-
+                                    </View>
+                                }
                                 <View style={styles.themeToggleContainer}>
                                     <Switch
                                         value={isDarkTheme}
@@ -98,11 +106,13 @@ const SettingScreen: FC = () => {
                         <Dialog visible={dialogVisible} onDismiss={hideDialog}>
                             <Dialog.Title>Confirm Logout</Dialog.Title>
                             <Dialog.Content>
-                                <Text>This is a paragraph of text.</Text>
+                                <Text>Are you sure you want to logout?</Text>
                             </Dialog.Content>
                             <Dialog.Actions>
                                 <Button onPress={hideDialog}>Cancel</Button>
-                                <Button onPress={confirmLogout} mode="contained">Confirm</Button>
+                                <Button onPress={confirmLogout} mode="contained" style={{ backgroundColor: COLORS.MAIN_APP_COLOR }}>
+                                    Logout
+                                </Button>
                             </Dialog.Actions>
                         </Dialog>
                     </Portal>
@@ -111,7 +121,6 @@ const SettingScreen: FC = () => {
         </MainLayout>
     )
 };
-
 
 const styles = StyleSheet.create({
     container: {
@@ -151,25 +160,23 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 50,
-
-         // iOS shadow
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 5,
-
-        // Android shadow
         elevation: 10,
-
-        // Optional background color to enhance shadow visibility
         backgroundColor: '#fff',
     },
     profileName: {
         fontSize: 20,
         fontWeight: 'bold'
     },
+    profileEmail: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 4
+    },
     settingContainer: {
-
     },
     settingItem: {
     },

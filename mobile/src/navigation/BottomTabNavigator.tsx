@@ -1,17 +1,21 @@
-import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ParentHomeScreen from '@/features/home/parent/ParentHomeScreen';
+import TeacherHomeScreen from '@/features/home/teacher/TeacherHomeScreen';
 import { BottomTabParamList } from '@/types/navigation';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {COLORS} from '@/constants/colors'; 
-import SettingScreen from '@/features/setting/screens/SettingScreen';
 import CustomTabButton from '@/components/CustomTabButton';
+import { useAuth } from '@/features/auth/context/AuthContext'; 
+import SettingScreen from '@/features/setting/SettingScreen';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator = () => {
+  const { getUserRole } = useAuth();
+  const userRole = getUserRole();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -47,7 +51,7 @@ const BottomTabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={ParentHomeScreen}
+        component={userRole === 'parent' ? ParentHomeScreen : TeacherHomeScreen}
         options={{
           tabBarLabel: 'Home',
         }}

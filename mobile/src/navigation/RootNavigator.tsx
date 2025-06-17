@@ -6,21 +6,24 @@ import AuthStack from '@/navigation/AuthStack';
 import MainStack from '@/navigation/MainStack'; 
 import { RootStackParamList } from '../types/navigation';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import SplashScreen from '@/screens/SplashScreen';
+// import SplashScreen from '@/screens/SplashScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const RootNavigator: React.FC = () => {
-  const { isLoggedIn, isLoading } = useAuth();
+  const { authState, getUserRole } = useAuth();
+  const userRole = getUserRole();
 
-  if (isLoading) return <SplashScreen />;
+  // if (authState.isLoading) return <SplashScreen />;
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false,  gestureEnabled: false  }}>
-        {isLoggedIn ? (
-          <Stack.Screen name="MainStack" component={MainStack} />
-        ) : (
+      <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false }}>
+        {!authState.isLoggedIn ? (
           <Stack.Screen name="AuthStack" component={AuthStack} />
+        ) : userRole === 'teacher' ? (
+          <Stack.Screen name="TeacherStack" component={MainStack} />
+        ) : (
+          <Stack.Screen name="ParentStack" component={MainStack} />
         )}
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,12 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {isAuthenticated, removeToken, storeToken} from '@/features/auth/storage/authStorage';
 
-interface AuthContextType {
+export type UserRole = 'teacher' | 'parent';
+
+interface AuthState {
   isLoggedIn: boolean;
   isLoading: boolean;
-  login: (token: string) => Promise<void>;
-  logout: () => Promise<void>;
+  user: {
+    email?: string;
+    userName?: string;
+    roleId?: number;
+    userId?: number;
+    teacherId?: number | null;
+  } | null;
 }
+
+interface AuthContextType {
+  authState: AuthState;
+  login: (token: string, userData: AuthState['user']) => Promise<void>;
+  logout: () => Promise<void>;
+  getUserRole: () => UserRole | null;
+}
+
+const initialState: AuthState = {
+  isLoggedIn: false,
+  isLoading: true,
+  user: null
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -17,8 +37,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [authState, setAuthState] = useState<AuthState>(initialState);
 
   useEffect(() => { 
     checkAuthStatus();
@@ -27,27 +46,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuthStatus = async () => {
     try {
       const authenticated = await isAuthenticated();
-      setIsLoggedIn(authenticated);
+      setAuthState(prev => ({
+        ...prev,
+        isLoggedIn: authenticated,
+        isLoading: false
+      }));
     } catch (error) {
       console.error('Error check auth:', error);
-      setIsLoggedIn(false);
-    } finally {
-      setIsLoading(false);
+      setAuthState(prev => ({
+        ...prev,
+        isLoggedIn: false,
+        isLoading: false
+      }));
     }
   };
 
-  const login = async (token: string) => {
+  const login = async (token: string, userData: AuthState['user']) => {
     await storeToken(token);
-    setIsLoggedIn(true);  
+    setAuthState(prev => ({
+      ...prev,
+      isLoggedIn: true,
+      user: userData
+    }));  
   };
 
   const logout = async () => {
     await removeToken();
-    setIsLoggedIn(false);
+    setAuthState(initialState);
+  };
+
+  const getUserRole = (): UserRole | null => {
+    if (!authState.user) return null;
+    // roleId 2 là teacher, roleId 3 là parent
+    return authState.user.roleId === 2 ? 'teacher' : 'parent';
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ authState, login, logout, getUserRole }}>
       {children}
     </AuthContext.Provider>
   );

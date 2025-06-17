@@ -3,7 +3,8 @@ import Config from 'react-native-config';
 import {getToken} from '@/features/auth/storage/authStorage';
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: Config.API_BASE_URL,  
+  // baseURL: Config.API_BASE_URL,   
+  baseURL: 'https://swd-g2-educonnect-be.onrender.com',
   timeout: 10000,  
   headers: {
     'Content-Type': 'application/json',

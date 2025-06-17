@@ -4,17 +4,16 @@ export type FormLoginRequest = {
   password: string;
 }
 
-type LoginSuccess = {
-  success: true;
-  data: {
-    token: string;
-    userId: string;
-    roleId: number;
-  };
+type LoginSuccess = { 
+  token: string;
+  userName: string;
+  email: string;
+  roleId: number;
+  userId: string;
+  teacherid: number | null;
 };
 
-type LoginFail = {
-  success: false;
+type LoginFail = { 
   message: string;
 };
 export type LoginResponse = LoginSuccess | LoginFail;
