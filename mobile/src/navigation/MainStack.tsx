@@ -3,10 +3,12 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTabNavigator from '@/navigation/BottomTabNavigator';
 import { MainStackParamList } from '@/types/navigation';
-import ParentScheduleScreen from '@/features/schedule/parent/ParentScheduleScreen';
+import ParentScheduleScreen from '@/features/schedule/parent';
 import TeacherScheduleScreen from '@/features/schedule/teacher/TeacherScheduleScreen';
-import ChatbotScreen from '@/features/chatbot/ChatbotScreen';
+import ChatbotScreen from '@/features/chatbot';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import ParentReportScreen from '@/features/report/parent';
+import ChildTeachersScreen from '@/features/childTeachers';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -25,6 +27,8 @@ const MainStack: React.FC = () => {
         <>
           <Stack.Screen name="ParentSchedule" component={ParentScheduleScreen} />
           <Stack.Screen name="Chatbot" component={ChatbotScreen}  options={{ headerShown: false }} />
+          <Stack.Screen name="ParentReport" component={ParentReportScreen}  options={{ headerShown: false }} />
+          <Stack.Screen name="ChildTeachers" component={ChildTeachersScreen}  options={{ headerShown: false }} />
         </>
       ) : (
         <Stack.Screen name="TeacherSchedule" component={TeacherScheduleScreen} />

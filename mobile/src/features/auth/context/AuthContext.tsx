@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {isAuthenticated, removeToken, storeToken} from '@/features/auth/storage/authStorage';
+import {isAuthenticated, removeToken, storeToken, storeUserData, getUserData, removeUserData} from '@/features/auth/storage/authStorage';
 
 export type UserRole = 'teacher' | 'parent';
 
@@ -46,11 +46,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuthStatus = async () => {
     try {
       const authenticated = await isAuthenticated();
-      setAuthState(prev => ({
-        ...prev,
-        isLoggedIn: authenticated,
-        isLoading: false
-      }));
+      if (authenticated) {
+        const userData = await getUserData();
+        setAuthState(prev => ({
+          ...prev,
+          isLoggedIn: true,
+          isLoading: false,
+          user: userData
+        }));
+      } else {
+        setAuthState(prev => ({
+          ...prev,
+          isLoggedIn: false,
+          isLoading: false
+        }));
+      }
     } catch (error) {
       console.error('Error check auth:', error);
       setAuthState(prev => ({
@@ -63,6 +73,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (token: string, userData: AuthState['user']) => {
     await storeToken(token);
+    if (userData) {
+      await storeUserData(userData);
+    }
     setAuthState(prev => ({
       ...prev,
       isLoggedIn: true,
@@ -72,6 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     await removeToken();
+    await removeUserData();
     setAuthState(initialState);
   };
 

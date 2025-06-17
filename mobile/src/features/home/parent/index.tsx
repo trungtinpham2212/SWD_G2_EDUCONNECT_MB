@@ -14,10 +14,9 @@ const screenWidth = Dimensions.get('window').width;
 const itemWidth = screenWidth - screenWidth * 9 / 100;
 
 
-const TeacherHomeScreen: React.FC = () => {
+const ParentHomeScreen: React.FC = () => {
     const navigation: NavigationProp<MainStackParamList> = useNavigation();
     const { authState } = useAuth();
-
     const theme = useTheme();
 
     return (
@@ -37,10 +36,26 @@ const TeacherHomeScreen: React.FC = () => {
                 {/* Main Content */}
                 <ScrollView scrollEnabled={true} showsVerticalScrollIndicator={false}>
                     <View style={styles.mainContent}>
-                        <View style={styles.row}> 
+                        <View style={styles.row}>
                             <View style={styles.containBtnNavigation}>
                                 <Pressable
-                                    onPress={() => navigation.navigate('TeacherSchedule')}
+                                    onPress={() => navigation.navigate('Chatbot')}
+                                    style={({ pressed }) => [
+                                        styles.button,
+                                        {
+                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
+                                        },
+                                    ]}
+                                >
+                                    <View style={styles.containInsidePress}>
+                                        <MaterialIcons name="chat-bubble-outline"   size={40} color="#333"/> 
+                                        <Text style={[styles.text]}>Chat With AI</Text>
+                                    </View>
+                                </Pressable>
+                            </View>
+                            <View style={styles.containBtnNavigation}>
+                                <Pressable
+                                    onPress={() => navigation.navigate('ParentSchedule')}
                                     style={({ pressed }) => [
                                         styles.button,
                                         {
@@ -50,13 +65,13 @@ const TeacherHomeScreen: React.FC = () => {
                                 >
                                     <View style={styles.containInsidePress}>
                                         <MaterialCommunityIcons name="timetable" size={40} color="#333" />
-                                        <Text style={[styles.text]}>Teacher Schedule</Text>
+                                        <Text style={[styles.text]}>Schedule</Text>
                                     </View>
                                 </Pressable>
                             </View> 
                             <View style={styles.containBtnNavigation}>
                                 <Pressable
-                                    onPress={() => alert("Report")}
+                                    onPress={() => navigation.navigate('ParentReport')}
                                     style={({ pressed }) => [
                                         styles.button,
                                         {
@@ -66,13 +81,13 @@ const TeacherHomeScreen: React.FC = () => {
                                 >
                                     <View style={styles.containInsidePress}>
                                         <Octicons name="repo" size={40} style={{marginRight:6}} color="#333" />        
-                                        <Text style={[styles.text]}>Evaluation</Text>
+                                        <Text style={[styles.text]}>Report</Text>
                                     </View>
                                 </Pressable>
                             </View>
                             <View style={styles.containBtnNavigation}>
                                 <Pressable
-                                    onPress={() => alert("Teacher Information")}
+                                    onPress={() => navigation.navigate('ChildTeachers')}
                                     style={({ pressed }) => [
                                         styles.button,
                                         {
@@ -98,7 +113,7 @@ const TeacherHomeScreen: React.FC = () => {
     );
 };
 
-export default TeacherHomeScreen;
+export default ParentHomeScreen;
 
 const styles = StyleSheet.create({
     container: {

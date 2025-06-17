@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ParentHomeScreen from '@/features/home/parent/ParentHomeScreen';
-import TeacherHomeScreen from '@/features/home/teacher/TeacherHomeScreen';
+import ParentHomeScreen from '@/features/home/parent';
+import TeacherHomeScreen from '@/features/home/teacher';
 import { BottomTabParamList } from '@/types/navigation';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -8,7 +8,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {COLORS} from '@/constants/colors'; 
 import CustomTabButton from '@/components/CustomTabButton';
 import { useAuth } from '@/features/auth/context/AuthContext'; 
-import SettingScreen from '@/features/setting/SettingScreen';
+import SettingScreen from '@/features/setting';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 

@@ -18,3 +18,10 @@ type LoginFail = {
 };
 export type LoginResponse = LoginSuccess | LoginFail;
 
+export type UserData ={
+  email?: string;
+  userName?: string;
+  roleId?: number;
+  userId?: number;
+  teacherId?: number | null;
+}
