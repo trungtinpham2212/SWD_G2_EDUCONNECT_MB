@@ -28,7 +28,7 @@ const MainStack: React.FC = () => {
           <Stack.Screen name="ParentSchedule" component={ParentScheduleScreen} />
           <Stack.Screen name="Chatbot" component={ChatbotScreen}  options={{ headerShown: false }} />
           <Stack.Screen name="ParentReport" component={ParentReportScreen}  options={{ headerShown: false }} />
-          <Stack.Screen name="ChildTeachers" component={ChildTeachersScreen}  options={{ headerShown: false }} />
+          <Stack.Screen name="ChildTeachers" component={ChildTeachersScreen}   />
         </>
       ) : (
         <Stack.Screen name="TeacherSchedule" component={TeacherScheduleScreen} />

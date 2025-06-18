@@ -4,6 +4,6 @@ export const COLORS = {
     BACKGROUND_CONTENT_HOME: "#291926",
     WHITE_TEXT : "#f5f5f5",
     MAIN_APP_COLOR: "#2563eb",
-    LIGHT_BLUE_MAIN:"#37e4ed"  
+    LIGHT_BLUE_MAIN:"#C4D6FF"  
 
 }
