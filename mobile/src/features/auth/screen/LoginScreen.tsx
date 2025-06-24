@@ -11,7 +11,7 @@ import { COLORS } from '@/constants/colors';
 // import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 // import { RootStackParamList } from '@/types/navigation';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { FormLoginRequest, loginService } from '@/api';
+import { FormLoginRequest, loginService } from '@/api'; 
 
 // type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 
 
@@ -38,7 +38,10 @@ const LoginScreen = () => {
           userName: res.userName,
           roleId: Number(res.roleId),
           userId: Number(res.userId),
-          teacherId: res.teacherid
+          teacherId: res.teacherid,
+          fullname: res.fullname,
+          phoneNumber: res.phoneNumber,
+          address: res.address
         });  
       } else {
         console.log("Login failed:");

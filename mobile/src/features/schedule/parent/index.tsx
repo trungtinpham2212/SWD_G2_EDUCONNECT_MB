@@ -4,16 +4,18 @@ import { useTheme } from 'react-native-paper';
 import { SIZES } from '@/constants';
 import moment from 'moment';
 import { Picker } from '@react-native-picker/picker';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const ParentScheduleScreen: FC = () => {
     const theme = useTheme();
-    const [currentDate] = useState(moment());
+    // const [currentDate] = useState(moment());
     const [selectedDate, setSelectedDate] = useState(moment());
+    const [currentWeek, setCurrentWeek] = useState(moment().startOf('week'));
     const [value, setValue] = useState<string>('Dao Ngoc Hoang');
 
     // Generate array of dates for the week
     const weekDates = Array.from({ length: 7 }, (_, i) => {
-        const date = moment().startOf('week').add(i, 'days');
+        const date = moment(currentWeek).add(i, 'days');
         return {
             day: date.format('ddd'),
             date: date.format('DD'),
@@ -23,6 +25,19 @@ const ParentScheduleScreen: FC = () => {
         };
     });
 
+    const goToPreviousWeek = () => {
+        const newWeek = moment(currentWeek).subtract(1, 'week');
+        setCurrentWeek(newWeek);
+        // Reset selected date to first day of new week
+        setSelectedDate(newWeek);
+    };
+
+    const goToNextWeek = () => {
+        const newWeek = moment(currentWeek).add(1, 'week');
+        setCurrentWeek(newWeek);
+        // Reset selected date to first day of new week
+        setSelectedDate(newWeek);
+    };
 
     const todaySchedule = [
         {  subject: 'Mathematics' },
@@ -48,6 +63,7 @@ const ParentScheduleScreen: FC = () => {
                 styles.dayText,
                 (item.isToday || item.isSelected) && styles.todayText
             ]}>{item.day}</Text> 
+            <Text style={styles.dayText}>{item.date}</Text>
         </TouchableOpacity>
     );
     const renderScheduleItem = ({ item, index }: { item: any, index: number }) => (
@@ -104,18 +120,34 @@ const ParentScheduleScreen: FC = () => {
                 </View>
 
                 <View style={{ marginHorizontal: SIZES.DISTANCE_MAIN_NEGATIVE }}>
-                    <FlatList
-                        data={weekDates}
-                        renderItem={renderDayItem}
-                        keyExtractor={(_, index) => index.toString()}
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.weekContainer}
-                        snapToInterval={width * 0.25}
-                        ItemSeparatorComponent={() => <TouchableOpacity style={{ width: 10 }} />}
-                        ListHeaderComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE }} />}
-                        ListFooterComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE }} />}
-                    />
+                    <View style={styles.weekNavigationContainer}>
+                        <TouchableOpacity 
+                            style={styles.navButton} 
+                            onPress={goToPreviousWeek}
+                        >
+                            <MaterialIcons name="keyboard-arrow-left" size={24} color="#fff" style={{ paddingHorizontal: 4 }}   />
+                        </TouchableOpacity>
+                        
+                        <FlatList
+                            data={weekDates}
+                            renderItem={renderDayItem}
+                            keyExtractor={(_, index) => index.toString()}
+                            horizontal={true}
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.weekContainer}
+                            snapToInterval={width * 0.25}
+                            ItemSeparatorComponent={() => <TouchableOpacity style={{ width: 10 }} />}
+                            ListHeaderComponent={ <View style={{ width: 4 }} />}
+                            ListFooterComponent={<View style={{ width: 4}} />}
+                        />
+                        
+                        <TouchableOpacity 
+                            style={styles.navButton} 
+                            onPress={goToNextWeek}
+                        >
+                            <MaterialIcons name="keyboard-arrow-right" size={24} color="#fff" style={{ paddingHorizontal: 4 }}     />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Today's Schedule */}
@@ -235,7 +267,7 @@ const styles = StyleSheet.create({
     dayContainer: {
         alignItems: 'center',
         paddingHorizontal: 5,
-        paddingVertical: 15,
+        paddingVertical: 5,
         borderRadius: 8,
         width: width * 0.25,
         backgroundColor: '#FFFFFF',
@@ -314,7 +346,34 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: 15,
         color: '#2C3E50',
-    }
+    },
+    weekNavigationContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+    },
+    navButton: { 
+        height: 50,
+        borderRadius: 20,
+        backgroundColor: '#3498DB',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    navButtonText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
 });
 
 export default ParentScheduleScreen;

@@ -4,34 +4,50 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTabNavigator from '@/navigation/BottomTabNavigator';
 import { MainStackParamList } from '@/types/navigation';
 import ParentScheduleScreen from '@/features/schedule/parent';
-import TeacherScheduleScreen from '@/features/schedule/teacher/TeacherScheduleScreen';
+import TeacherScheduleScreen from '@/features/schedule/teacher';
 import ChatbotScreen from '@/features/chatbot';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import ParentReportScreen from '@/features/report/parent';
 import ChildTeachersScreen from '@/features/childTeachers';
+import ClassStudentScreen from '@/features/myClass';
+import { useTheme } from 'react-native-paper';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
 const MainStack: React.FC = () => {
   const { getUserRole } = useAuth();
   const userRole = getUserRole();
+  const theme = useTheme();
 
   return (
-    <Stack.Navigator>
-      <Stack.Screen 
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.tertiaryContainer,
+        },
+        headerTintColor: theme.colors.onTertiaryContainer,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
+      <Stack.Screen
         name="BottomTabs"
         component={BottomTabNavigator}
-        options={{ headerShown: false }} 
+        options={{ headerShown: false }}
       />
       {userRole === 'parent' ? (
         <>
           <Stack.Screen name="ParentSchedule" component={ParentScheduleScreen} />
-          <Stack.Screen name="Chatbot" component={ChatbotScreen}  options={{ headerShown: false }} />
-          <Stack.Screen name="ParentReport" component={ParentReportScreen}  options={{ headerShown: false }} />
-          <Stack.Screen name="ChildTeachers" component={ChildTeachersScreen}   />
+          <Stack.Screen name="Chatbot" component={ChatbotScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ParentReport" component={ParentReportScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ChildTeachers" component={ChildTeachersScreen} />
         </>
       ) : (
-        <Stack.Screen name="TeacherSchedule" component={TeacherScheduleScreen} />
+        <>
+          <Stack.Screen name="TeacherSchedule" component={TeacherScheduleScreen} />
+          <Stack.Screen name="ClassStudent" component={ClassStudentScreen} />
+        </>
       )}
     </Stack.Navigator>
   );

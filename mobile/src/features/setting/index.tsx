@@ -39,7 +39,7 @@ const SettingScreen: FC = () => {
             <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
                 <View style={styles.header}>
                     <Text style={[styles.welcomeText, { color: theme.colors.onSurface }]}>
-                        Settings
+                        Settings 
                     </Text>
                 </View>
                 {/* Main Content */}

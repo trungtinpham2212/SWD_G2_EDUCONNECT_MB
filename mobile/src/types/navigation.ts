@@ -18,6 +18,7 @@ export type MainStackParamList = {
   Chatbot: undefined;
   ParentReport: undefined;
   ChildTeachers: undefined;
+  ClassStudent: undefined;
 };
 
 export type BottomTabParamList = {

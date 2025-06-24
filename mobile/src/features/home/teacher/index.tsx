@@ -55,7 +55,7 @@ const TeacherHomeScreen: React.FC = () => {
                             </View> 
                             <View style={styles.containBtnNavigation}>
                                 <Pressable
-                                    onPress={() => alert("Report")}
+                                    onPress={() => navigation.navigate('ClassStudent')}
                                     style={({ pressed }) => [
                                         styles.button,
                                         {
@@ -65,7 +65,7 @@ const TeacherHomeScreen: React.FC = () => {
                                 >
                                     <View style={styles.containInsidePress}>
                                         <Octicons name="repo" size={40} style={{marginRight:6}} color="#333" />        
-                                        <Text style={[styles.text]}>Evaluation</Text>
+                                        <Text style={[styles.text]}>Homeroom Student</Text>
                                     </View>
                                 </Pressable>
                             </View>
@@ -85,7 +85,7 @@ const TeacherHomeScreen: React.FC = () => {
                                             size={40}
                                             color="#333"
                                         />
-                                        <Text style={[styles.text]}>Teacher Information</Text>
+                                        <Text style={[styles.text]}>Report</Text>
                                     </View>
                                 </Pressable>
                             </View>

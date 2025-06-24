@@ -11,6 +11,9 @@ type LoginSuccess = {
   roleId: number;
   userId: string;
   teacherid: number | null;
+  fullname?: string;
+  phoneNumber?: string;
+  address?: string;
 };
 
 type LoginFail = { 
@@ -24,4 +27,7 @@ export type UserData ={
   roleId?: number;
   userId?: number;
   teacherId?: number | null;
+  fullname?: string;
+  phoneNumber?: string;
+  address?: string;
 }

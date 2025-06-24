@@ -1,18 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {isAuthenticated, removeToken, storeToken, storeUserData, getUserData, removeUserData} from '@/features/auth/storage/authStorage';
+import { UserData } from '@/api';
 
 export type UserRole = 'teacher' | 'parent';
 
 interface AuthState {
   isLoggedIn: boolean;
   isLoading: boolean;
-  user: {
-    email?: string;
-    userName?: string;
-    roleId?: number;
-    userId?: number;
-    teacherId?: number | null;
-  } | null;
+  user: UserData| null;
 }
 
 interface AuthContextType {
