@@ -7,23 +7,25 @@ import { SIZES } from "@/constants";
 import { COLORS } from "@/constants/colors";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Feather } from '@expo/vector-icons';
-import { ThemeContext } from '@/context/ThemeContext'; 
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/types/navigation';
+import { ThemeContext } from '@/context/ThemeContext';
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { MainStackParamList } from "@/types/navigation";
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+// type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const SettingScreen: FC = () => {
+const SettingScreen= () => {
     const theme = useTheme();
+    const navigation: NavigationProp<MainStackParamList> = useNavigation();
+
     const { logout, authState } = useAuth();
     const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
-    const [dialogVisible, setDialogVisible] = useState(false); 
+    const [dialogVisible, setDialogVisible] = useState(false);
     const showDialog = () => setDialogVisible(true);
     const hideDialog = () => setDialogVisible(false);
 
     const handleLogout = async () => {
         try {
-            await logout(); 
+            await logout();
         } catch (error) {
             Alert.alert('Error', 'Failed to logout. Please try again.');
         }
@@ -39,7 +41,7 @@ const SettingScreen: FC = () => {
             <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
                 <View style={styles.header}>
                     <Text style={[styles.welcomeText, { color: theme.colors.onSurface }]}>
-                        Settings 
+                        Settings
                     </Text>
                 </View>
                 {/* Main Content */}
@@ -62,7 +64,7 @@ const SettingScreen: FC = () => {
                     </View>
                     <View style={styles.settingContainer}>
                         <View style={styles.settingItem}>
-                            <TouchableOpacity style={styles.btnGotoDetetail} onPress={() => alert('hello')}>
+                            <TouchableOpacity style={styles.btnGotoDetetail} onPress={() => navigation.navigate('EditProfile')}>
                                 <View style={styles.settingItemFront}>
                                     <Feather name="user" size={24} color={theme.colors.onSurface} style={{ marginRight: 15 }} />
                                     <Text style={[styles.settingName, { color: theme.colors.onSurface }]}>Edit Profile</Text>
@@ -102,21 +104,22 @@ const SettingScreen: FC = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <Portal>
-                        <Dialog visible={dialogVisible} onDismiss={hideDialog}>
-                            <Dialog.Title>Confirm Logout</Dialog.Title>
-                            <Dialog.Content>
-                                <Text>Are you sure you want to logout?</Text>
-                            </Dialog.Content>
-                            <Dialog.Actions>
-                                <Button onPress={hideDialog}>Cancel</Button>
-                                <Button onPress={confirmLogout} mode="contained" style={{ backgroundColor: COLORS.MAIN_APP_COLOR }}>
-                                    Logout
-                                </Button>
-                            </Dialog.Actions>
-                        </Dialog>
-                    </Portal>
+
                 </View>
+                <Portal>
+                    <Dialog visible={dialogVisible} onDismiss={hideDialog}>
+                        <Dialog.Title>Confirm Logout</Dialog.Title>
+                        <Dialog.Content>
+                            <Text style={{ color: theme.colors.onSurface }}>Are you sure you want to logout?</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={hideDialog}>Cancel</Button>
+                            <Button onPress={confirmLogout} mode="contained" style={{ backgroundColor: COLORS.MAIN_APP_COLOR }}>
+                                Logout
+                            </Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
             </View>
         </MainLayout>
     )

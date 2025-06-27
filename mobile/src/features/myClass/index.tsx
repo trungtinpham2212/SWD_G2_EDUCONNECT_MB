@@ -1,7 +1,7 @@
 import { COLORS, SIZES } from "@/constants";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
-import { Image, StyleSheet, Text, TextInput } from "react-native";
+import { Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableWithoutFeedback } from "react-native";
 import { View } from "react-native";
 import { useTheme } from "react-native-paper";
 
@@ -13,98 +13,71 @@ const ClassStudentScreen: React.FC = () => {
     const [debouncedName, setDebouncedName] = useState(name);
 
     useEffect(() => {
-      const handler = setTimeout(() => {
-        setDebouncedName(name);
-      }, 500); // 500ms debounce
- 
-      return () => {
-        clearTimeout(handler);
-      };
+        const handler = setTimeout(() => {
+            setDebouncedName(name);
+        }, 500); // 500ms debounce
+
+        return () => {
+            clearTimeout(handler);
+        };
     }, [name]);
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-            <View style={styles.mainContent}>
-                {/* <Text style={styles.infoLabel}>Lớp</Text> */}
-                <View style={styles.infoValueContainer}>
-                    <Text style={styles.infoValue}>Class: 10A1</Text>
-                </View>
-                <View>
-                    <TextInput
-                        style={{
-                            borderWidth: 1,
-                            borderColor: "#ccc",
-                            borderRadius: 6,
-                            paddingHorizontal: 8,
-                            marginBottom: 12,
-                            // height: 40,
-                            backgroundColor: "#fff"
-                        }}
-                        placeholder="Search by name..."
-                        value={name}
-                        onChangeText={setName}
-                    />
-                </View>
-                <View style={styles.listCard}>
-                    <View style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <Image source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} style={styles.cardImage} />
-                            <View>
-                                <Text style={styles.cardName}>Tabatha McDuffy</Text>
-                                <Text style={styles.cardSubject}>19/06/2004</Text>
-                            </View>
-                        </View>
-                        <View style={styles.cardContent}>
-                            <View style={styles.cardContentItem}>
-                                <Text style={styles.cardContentItemTextLeft}>Phone:</Text>
-                                <Text style={styles.cardContentItemTextRight}>01234567890</Text>
-                            </View>
-                            <View style={styles.cardContentItem}>
-                                <Text style={styles.cardContentItemTextLeft}>Parent Name:</Text>
-                                <Text style={styles.cardContentItemTextRight}>Nock</Text>
-                            </View>
-                        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+                <View style={styles.mainContent}>
+                    {/* <Text style={styles.infoLabel}>Lớp</Text> */}
+                    <View style={[styles.infoValueContainer,
+                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline, },
+                    ]}>
+                        <Text style={[styles.infoValue, { color: theme.colors.onSurface, },]} >
+                            Class: 10A1
+                        </Text>
                     </View>
-                    <View style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <Image source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} style={styles.cardImage} />
-                            <View>
-                                <Text style={styles.cardName}>Tabatha McDuffy</Text>
-                                <Text style={styles.cardSubject}>Math</Text>
-                            </View>
-                        </View>
-                        <View style={styles.cardContent}>
-                            <View style={styles.cardContentItem}>
-                                <Text style={styles.cardContentItemTextLeft}>Phone:</Text>
-                                <Text style={styles.cardContentItemTextRight}>01234567890</Text>
-                            </View>
-                            <View style={styles.cardContentItem}>
-                                <Text style={styles.cardContentItemTextLeft}>Parent Name:</Text>
-                                <Text style={styles.cardContentItemTextRight}>tabatha@gmail.com sdafasd sdfasd</Text>
-                            </View>
-                        </View>
+                    <View>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: theme.colors.surface,
+                                    borderColor: theme.colors.outline,
+                                    color: theme.colors.onSurface,
+                                },
+                            ]}
+                            placeholder="Search by name..."
+                            placeholderTextColor={theme.colors.onSurfaceVariant} // Tách ra khỏi style
+                            value={name}
+                            onChangeText={setName}
+                        />
                     </View>
-                    <View style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <Image source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} style={styles.cardImage} />
-                            <View>
-                                <Text style={styles.cardName}>Tabatha McDuffy</Text>
-                                <Text style={styles.cardSubject}>Math</Text>
+                    <View style={styles.listCard}>
+                        <View style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <Image source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} style={styles.cardImage} />
+                                <View>
+                                    <Text style={[styles.cardName, { color: theme.colors.primary }]}>Tabatha McDuffy</Text>
+                                    <Text style={[styles.cardSubject, { color: theme.colors.onBackground }]}>19/06/2004</Text>
+                                </View>
+                            </View>
+                            <View style={styles.cardContent}>
+                                <View style={styles.cardContentItem}>
+                                    <Text style={[styles.cardContentItemTextLeft, { color: theme.colors.onSurface }]}>Phone:</Text>
+                                    <Text style={[styles.cardContentItemTextRight, { color: theme.colors.onBackground }]}>01234567890</Text>
+                                </View>
+                                <View style={styles.cardContentItem}>
+                                    <Text style={[styles.cardContentItemTextLeft, { color: theme.colors.onSurface }]}>Parent Name:</Text>
+                                    <Text style={[styles.cardContentItemTextRight, { color: theme.colors.onBackground }]}
+                                      numberOfLines={1}   ellipsizeMode="tail"
+                                    >Nock sssjj adsbfhasdbjsdjkfasdjk sdahfhasdhds</Text>
+                                </View>
                             </View>
                         </View>
-                        <View style={styles.cardContent}>
-                            <View style={styles.cardContentItem}>
-                                <Text style={styles.cardContentItemTextLeft}>Phone:</Text>
-                                <Text style={styles.cardContentItemTextRight}>01234567890</Text>
-                            </View>
-                            <View style={styles.cardContentItem}>
-                                <Text style={styles.cardContentItemTextLeft}>Parent Name:</Text>
-                                <Text style={styles.cardContentItemTextRight}>tabatha@gmail.com sdafasd sdfasd</Text>
-                            </View>
-                        </View>
+
                     </View>
                 </View>
-            </View>
-        </View>
+            </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     )
 };
 
@@ -158,18 +131,25 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
+        marginBottom: 10
     },
     cardImage: {
         width: 60,
         height: 60,
+        borderRadius: 50,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5
     },
     cardName: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
         color: COLORS.MAIN_APP_COLOR
     },
     cardSubject: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#666',
     },
     cardContent: {
@@ -183,14 +163,15 @@ const styles = StyleSheet.create({
         // overflow: 'hidden',
     },
     cardContentItemTextLeft: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#666',
         fontWeight: 'bold',
         width: 'auto'
     },
     cardContentItemTextRight: {
-        fontSize: 14,
-        color: '#666',
+        fontSize: 16,
+        color: '#666', 
+        width: '60%'
     },
     infoLabel: {
         fontSize: 14,
@@ -218,6 +199,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '500',
         color: '#2C3E50',
+    },
+    input: {
+        fontSize: 16,
+        borderWidth: 1,
+        borderRadius: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 10,
+        marginBottom: 12,
     },
 });
 

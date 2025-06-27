@@ -19,6 +19,8 @@ export type MainStackParamList = {
   ParentReport: undefined;
   ChildTeachers: undefined;
   ClassStudent: undefined;
+  Evaluation: undefined;
+  EditProfile : undefined;
 };
 
 export type BottomTabParamList = {

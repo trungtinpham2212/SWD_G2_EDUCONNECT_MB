@@ -1,31 +1,18 @@
 
 export type ScheduleQueryRequest = {
-    startDate: string,
-    endDate: string,
+    date: string, 
     teacherId: number
 }
 
 export type PeriodTeacher = {
-    periodid : number,
-    subjectid: number,
-    periodno: number,
-    classid: number,
-    teacherid: number,
-    perioddate: Date,
-    class: ClassRoom | null,
-    subject: Subject | null,
+    periodid : number | null,
+    subjectid: number | null,
+    periodno: number | null,
+    classid: number | null,
+    teacherid: number| null,
+    perioddate: string,
+    className: string | null,
+    subjectName: string | null,
+    teacherName: string | null
 
-}
-
-type ClassRoom = {
-    classid: number,
-    classname: string,
-    grade: number,
-    teacherhomeroomid: number,
-    schoolyearid : number,
-}
-
-type Subject = {
-    subjectid: number,
-    subjectname: string,
-}
+} 

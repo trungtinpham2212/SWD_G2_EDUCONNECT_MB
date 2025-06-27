@@ -1,41 +1,85 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet, FlatList } from 'react-native';
-import MainLayout from '@/layouts/MainLayout';
-import { useTheme } from 'react-native-paper';
+import React, { memo, useEffect, useMemo, useState } from 'react';
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet, FlatList, ActivityIndicator, Image, Platform } from 'react-native';
+// import MainLayout from '@/layouts/MainLayout';
+import { Button, useTheme } from 'react-native-paper';
 import moment from 'moment';
 import { SIZES } from '@/constants';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { MainStackParamList } from '@/types/navigation';
+import { PeriodTeacher, ScheduleQueryRequest, teacherService } from '@/api';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useAuth } from '@/features/auth/context/AuthContext';
 
+
+
+const { width } = Dimensions.get('window');
 
 
 const TeacherScheduleScreen: React.FC = () => {
   const theme = useTheme();
+
   // const [currentDate] = useState(moment());
   const [selectedDate, setSelectedDate] = useState(moment());
   const [currentWeek, setCurrentWeek] = useState(moment().startOf('week'));
+  const [showDatePicker, setShowDatePicker] = useState(false);
+ 
+  const [schedule, setSchedule] = useState<PeriodTeacher[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  
-const todaySchedule = [
-  { subject: 'Mathematics' },
-  { subject: 'Physics' },
-  { subject: 'Chemistry' },
-  { subject: 'Biology' },
-  { subject: 'Biology' },
-  { subject: 'Biology' },
-  { subject: 'Biology' },
-  { subject: 'Biology' },
-];
+  const { authState } = useAuth(); 
+  const teacherId = authState.user?.teacherId!;
 
-  const weekDates = Array.from({ length: 7 }, (_, i) => {
-    const date = moment(currentWeek).add(i, 'days');
-    return {
-      day: date.format('ddd'),
-      date: date.format('DD'),
-      fullDate: date,
-      isToday: date.isSame(moment(), 'day'),
-      isSelected: date.isSame(selectedDate, 'day')
-    };
-  });
+ 
+
+  const weekDates = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = moment(currentWeek).add(i, 'days');
+      return {
+        day: date.format('ddd'),
+        date: date.format('DD'),
+        fullDate: date,
+        isToday: date.isSame(moment(), 'day'),
+        isSelected: date.isSame(selectedDate, 'day'),
+      };
+    });
+  }, [currentWeek, selectedDate]);
+
+  const onDateChange = (event: DateTimePickerEvent, date?: Date) => {
+    setShowDatePicker(false);
+
+    if (event.type === 'set' && date) {
+      const selectedMoment = moment(date);
+      setSelectedDate(selectedMoment);
+      setCurrentWeek(selectedMoment.clone().startOf('isoWeek'));
+    }
+  };
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // const startDate = currentWeek.format('YYYY-MM-DD');
+        // const endDate = moment(currentWeek).endOf('week').format('YYYY-MM-DD');
+        const date = selectedDate.format('YYYY-MM-DD');
+        console.log('Week range:', date);
+        const payload: ScheduleQueryRequest = {
+          date,
+          teacherId
+        };
+        const response = await teacherService.scheule(payload);
+        setSchedule(response);
+      } catch (err) {
+        setError('Failed to load schedule');
+        console.error('Error fetching schedule:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSchedule();
+  }, [selectedDate, teacherId]);
 
   const goToPreviousWeek = () => {
     const newWeek = moment(currentWeek).subtract(1, 'week');
@@ -70,34 +114,44 @@ const todaySchedule = [
   );
 
 
-  const renderScheduleItem = ({ item, index }: { item: any, index: number }) => (
-    <TouchableOpacity>
-      <View style={styles.scheduleItem}>
-        <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={[styles.periodText,{color: theme.colors.onSurface}]}>1</Text>
-          <Text style={[styles.timeText, {color: theme.colors.primary}]}>07:30 - 08:15</Text>
-        </View>
-        <View style={{ width: '60%' }}>
-          <Text style={[styles.subjectText, {color: theme.colors.onSurface}]}>{item.subject}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-
- 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.mainContent}>
         <View style={{ marginHorizontal: SIZES.DISTANCE_MAIN_NEGATIVE }}>
-           <View style={styles.weekNavigationContainer}>
+          <View>
+            {showDatePicker && (
+              <DateTimePicker
+                mode="date"
+                value={selectedDate.toDate()}
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onDateChange}
+              />
+            )}
+          </View>
+          <View style={styles.containBtnChangeDate}>
             <TouchableOpacity
-              style={[styles.navButton, {backgroundColor: theme.colors.primary}]}
+              style={[styles.navButton, { backgroundColor: theme.colors.primary }]}
               onPress={goToPreviousWeek}
             >
               <MaterialIcons name="keyboard-arrow-left" size={24} color="#fff" style={{ paddingHorizontal: 4 }} />
             </TouchableOpacity>
-
-            <FlatList
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}  >
+              <View style={[styles.infoValueContainer]}>
+                <Text style={[styles.infoValue, { textAlign: 'center' }]}>
+                  {selectedDate.format('YYYY-MM-DD')}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.navButton, { backgroundColor: theme.colors.primary }]}
+              onPress={goToNextWeek}
+            >
+              <MaterialIcons name="keyboard-arrow-right" size={24} color="#fff" style={{ paddingHorizontal: 4 }} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.weekNavigationContainer}>
+            <FlatList 
+            
               data={weekDates}
               renderItem={renderDayItem}
               keyExtractor={(_, index) => index.toString()}
@@ -106,40 +160,76 @@ const todaySchedule = [
               contentContainerStyle={styles.weekContainer}
               snapToInterval={width * 0.25}
               ItemSeparatorComponent={() => <TouchableOpacity style={{ width: 10 }} />}
-              ListHeaderComponent={<View style={{ width: 4 }} />}
-              ListFooterComponent={<View style={{ width: 4 }} />}
+              // ListHeaderComponent={<View style={{ width: 4 }} />}
+              // ListFooterComponent={<View style={{ width: 4 }} />}
             />
-
-            <TouchableOpacity
-              style={[styles.navButton, {backgroundColor: theme.colors.primary}]}
-              onPress={goToNextWeek}
-            >
-              <MaterialIcons name="keyboard-arrow-right" size={24} color="#fff" style={{ paddingHorizontal: 4 }} />
-            </TouchableOpacity>
-          </View> 
+          </View>
         </View>
-        <View style={[styles.scheduleContainer, {backgroundColor: theme.colors.surface}]}>
-            <Text style={[styles.scheduleTitle, {color: theme.colors.onSurface}]}>
-              Schedule for {selectedDate.format('dddd, MMMM D')}
-            </Text>
+        <View style={[styles.scheduleContainer, { backgroundColor: theme.colors.surface }]}>
+          <Text style={[styles.scheduleTitle, { color: theme.colors.onSurface }]}>
+            Schedule for {selectedDate.format('dddd, MMMM D')}
+          </Text>
+          {loading ? (
+            <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
+          ) : error ? (
+            <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
+          ) : schedule.length === 0 ? (
+            <View>
+              <Image style={styles.imgNodata} source={{ uri: 'https://cdni.iconscout.com/illustration/premium/thumb/woman-with-no-appointment-illustration-download-in-svg-png-gif-file-formats--waiting-issue-empty-state-pack-people-illustrations-10922122.png' }} />
+              <Text style={[styles.noDataText, { color: theme.colors.onSurface }]}>
+                No schedule available
+              </Text>
+            </View>
+          ) : (
             <FlatList
-              data={todaySchedule}
-              renderItem={renderScheduleItem}
-              keyExtractor={(_, index) => index.toString()}
+              data={schedule}
+              renderItem={({ item }) => <RenderScheduleItem item={item} />}
+              keyExtractor={(item) => item.periodid?.toString() || Math.random().toString()}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scheduleList}
               style={styles.scheduleFlatList}
-              nestedScrollEnabled={true}
             />
-          </View>
+          )}
+        </View>
       </View>
     </View>
   );
 };
 
+const RenderScheduleItem = memo(({ item }: { item: PeriodTeacher }) => {
+  const theme = useTheme();
+  const navigation: NavigationProp<MainStackParamList> = useNavigation();
+
+  const formatTime = (periodDate: string) => {
+    if (!periodDate) return 'N/A';
+    const startTime = moment(periodDate).format('HH:mm');
+    const endTime = moment(periodDate).add(45, 'minutes').format('HH:mm');
+    return `${startTime} - ${endTime}`;
+  };
+
+  return (
+    <TouchableOpacity onPress={() => navigation.navigate('Evaluation')}>
+      <View style={styles.scheduleItem}>
+        <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={[styles.periodText, { color: theme.colors.onSurface }]}>
+            {item.periodno}
+          </Text>
+          <Text style={[styles.timeText, { color: theme.colors.primary }]}>
+            {formatTime(item.perioddate)}
+          </Text>
+        </View>
+        <View style={{ width: '60%' }}>
+          <Text style={[styles.subjectText, { color: theme.colors.onSurface }]}>
+            {item.subjectName}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  )
+});
 
 
-const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -297,7 +387,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8E8E8',
     alignItems: 'center',
   },
-  periodText:{
+  periodText: {
     fontSize: 20,
     fontWeight: '700',
   },
@@ -325,7 +415,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
-    marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+    paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+    // marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+    backgroundColor: 'red'
   },
   navButton: {
     height: 50,
@@ -347,6 +439,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  noDataText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  imgNodata: {
+    width: '100%',
+    height: 300
+  },
+  containBtnChangeDate: {
+    flexDirection: 'row',
+    marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+    justifyContent: 'space-between'
+  }
 });
 
 

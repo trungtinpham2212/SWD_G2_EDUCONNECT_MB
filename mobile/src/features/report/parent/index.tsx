@@ -6,7 +6,7 @@ import { useTheme } from 'react-native-paper';
 import { SIZES } from '@/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import DateRangeSelector from '@/features/report/parent/components/DateRangeSelector';
+// import DateRangeSelector from '@/features/report/parent/components/DateRangeSelector';
 
 
 const reports = [
@@ -44,7 +44,7 @@ const ParentReportScreen: React.FC = () => {
 
                 </View>
                 <View style={styles.mainContent}> 
-                    <DateRangeSelector />
+                    {/* <DateRangeSelector /> */}
                     
                     {/* Dropdown chọn học sinh */}
                     <View style={styles.dropdownRow}>

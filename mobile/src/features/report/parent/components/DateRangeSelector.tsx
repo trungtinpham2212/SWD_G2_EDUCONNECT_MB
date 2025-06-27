@@ -9,7 +9,7 @@ const DateRangeSelector: React.FC = () => {
   const [toDate, setToDate] = useState<Date>(new Date(Date.now() + 24 * 60 * 60 * 1000)); // Mặc định hơn fromDate 1 ngày
   const [showFromPicker, setShowFromPicker] = useState<boolean>(false);
   const [showToPicker, setShowToPicker] = useState<boolean>(false);
- 
+
   const onChange = (type: 'from' | 'to', event: DateTimePickerEvent, selectedDate?: Date) => {
     if (event.type === 'dismissed') {
       if (type === 'from') setShowFromPicker(false);
@@ -49,7 +49,7 @@ const DateRangeSelector: React.FC = () => {
   const handleConfirm = () => {
     console.log('Ngày bắt đầu:', fromDate.toISOString());
     console.log('Ngày kết thúc:', toDate.toISOString());
-  
+
     // Gọi API hoặc xử lý lọc tại đây
     // fetchData(fromDate, toDate);
   };
@@ -87,24 +87,24 @@ const DateRangeSelector: React.FC = () => {
         )}
       </View>
       <Button
-              mode="contained"
-              onPress={handleConfirm}
-              style={styles.button}
-              contentStyle={styles.buttonContent}
-              labelStyle={{ color: '#fff' }}
-            //   disabled={isLoading}
-            //   loading={isLoading}
-            >
-              {/* {isLoading ? 'Signing in...' : 'Sign in'} */}
-                Confirm
-            </Button>
+        mode="contained"
+        onPress={handleConfirm}
+        style={styles.button}
+        contentStyle={styles.buttonContent}
+        labelStyle={{ color: '#fff' }}
+      //   disabled={isLoading}
+      //   loading={isLoading}
+      >
+        {/* {isLoading ? 'Signing in...' : 'Sign in'} */}
+        Confirm
+      </Button>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8, 
+    marginVertical: 8,
   },
   row: {
     flexDirection: 'row',
