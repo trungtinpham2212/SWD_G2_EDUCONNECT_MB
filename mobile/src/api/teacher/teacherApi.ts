@@ -1,8 +1,8 @@
 import axiosInstance from "@/api/axiosConfig";
-import { ScheduleQueryRequest, PeriodTeacher } from "@/api/teacher/teacherTypes";
+import { ScheduleTeacherQueryRequest, Period } from "@/api/teacher/teacherTypes";
 export const teacherApi = {
-    scheule: async (payload : ScheduleQueryRequest) : Promise<PeriodTeacher[]> => {
-        const response = await axiosInstance.get<PeriodTeacher[]>('/api/periods/by-date',{
+    scheule: async (payload : ScheduleTeacherQueryRequest) : Promise<Period[]> => {
+        const response = await axiosInstance.get<Period[]>('/api/periods/by-date',{
             params: {
                 ...payload
             }

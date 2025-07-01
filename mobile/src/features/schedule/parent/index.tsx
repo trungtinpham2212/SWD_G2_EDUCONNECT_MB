@@ -1,10 +1,12 @@
-import React, { FC, useState } from 'react';
-import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useTheme } from 'react-native-paper'; 
+import React, { FC, useMemo, useState } from 'react';
+import { Dimensions, FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import { SIZES } from '@/constants';
 import moment from 'moment';
 import { Picker } from '@react-native-picker/picker';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+
 
 const ParentScheduleScreen: FC = () => {
     const theme = useTheme();
@@ -12,18 +14,21 @@ const ParentScheduleScreen: FC = () => {
     const [selectedDate, setSelectedDate] = useState(moment());
     const [currentWeek, setCurrentWeek] = useState(moment().startOf('week'));
     const [value, setValue] = useState<string>('Dao Ngoc Hoang');
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
-    // Generate array of dates for the week
-    const weekDates = Array.from({ length: 7 }, (_, i) => {
-        const date = moment(currentWeek).add(i, 'days');
-        return {
-            day: date.format('ddd'),
-            date: date.format('DD'),
-            fullDate: date,
-            isToday: date.isSame(moment(), 'day'),
-            isSelected: date.isSame(selectedDate, 'day')
-        };
-    });
+
+    const weekDates = useMemo(() => {
+        return Array.from({ length: 7 }, (_, i) => {
+            const date = moment(currentWeek).add(i, 'days');
+            return {
+                day: date.format('ddd'),
+                date: date.format('DD'),
+                fullDate: date,
+                isToday: date.isSame(moment(), 'day'),
+                isSelected: date.isSame(selectedDate, 'day'),
+            };
+        });
+    }, [currentWeek, selectedDate]);
 
     const goToPreviousWeek = () => {
         const newWeek = moment(currentWeek).subtract(1, 'week');
@@ -40,14 +45,14 @@ const ParentScheduleScreen: FC = () => {
     };
 
     const todaySchedule = [
-        {  subject: 'Mathematics' },
-        {  subject: 'Physics' },
-        {  subject: 'Chemistry' },
-        {  subject: 'Biology' },
-        {  subject: 'Biology' },
-        {  subject: 'Biology' },
-        {  subject: 'Biology' },
-        {  subject: 'Biology' },
+        { subject: 'Mathematics' },
+        { subject: 'Physics' },
+        { subject: 'Chemistry' },
+        { subject: 'Biology' },
+        { subject: 'Biology' },
+        { subject: 'Biology' },
+        { subject: 'Biology' },
+        { subject: 'Biology' },
     ];
 
     const renderDayItem = ({ item, index }: { item: any, index: number }) => (
@@ -62,7 +67,7 @@ const ParentScheduleScreen: FC = () => {
             <Text style={[
                 styles.dayText,
                 (item.isToday || item.isSelected) && styles.todayText
-            ]}>{item.day}</Text> 
+            ]}>{item.day}</Text>
             <Text style={styles.dayText}>{item.date}</Text>
         </TouchableOpacity>
     );
@@ -79,7 +84,15 @@ const ParentScheduleScreen: FC = () => {
             </View>
         </TouchableOpacity>
     );
+    const onDateChange = (event: DateTimePickerEvent, date?: Date) => {
+        setShowDatePicker(false);
 
+        if (event.type === 'set' && date) {
+            const selectedMoment = moment(date);
+            setSelectedDate(selectedMoment);
+            setCurrentWeek(selectedMoment.clone().startOf('isoWeek'));
+        }
+    };
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
             {/* <View style={styles.header}>
@@ -94,12 +107,6 @@ const ParentScheduleScreen: FC = () => {
                             {/* <Text style={styles.infoLabel}>Lớp</Text> */}
                             <View style={styles.infoValueContainer}>
                                 <Text style={styles.infoValue}>Class: 10A1</Text>
-                            </View>
-                        </View>
-                        <View style={styles.infoItem}>
-                            {/* <Text style={styles.infoLabel}>Học kỳ</Text> */}
-                            <View style={styles.infoValueContainer}>
-                                <Text style={styles.infoValue}>Semester: 1</Text>
                             </View>
                         </View>
                     </View>
@@ -120,14 +127,40 @@ const ParentScheduleScreen: FC = () => {
                 </View>
 
                 <View style={{ marginHorizontal: SIZES.DISTANCE_MAIN_NEGATIVE }}>
-                    <View style={styles.weekNavigationContainer}>
-                        <TouchableOpacity 
-                            style={styles.navButton} 
+                    <View>
+                        {showDatePicker && (
+                            <DateTimePicker
+                                mode="date"
+                                value={selectedDate.toDate()}
+                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                onChange={onDateChange}
+                            />
+                        )}
+                    </View>
+                    <View style={styles.containBtnChangeDate}>
+                        <TouchableOpacity
+                            style={[styles.navButton, { backgroundColor: theme.colors.primary }]}
                             onPress={goToPreviousWeek}
                         >
-                            <MaterialIcons name="keyboard-arrow-left" size={24} color="#fff" style={{ paddingHorizontal: 4 }}   />
+                            <MaterialIcons name="keyboard-arrow-left" size={24} color="#fff" style={{ paddingHorizontal: 4 }} />
                         </TouchableOpacity>
-                        
+                        <TouchableOpacity onPress={() => setShowDatePicker(true)}  >
+                            <View style={[styles.infoValueContainer]}>
+                                <Text style={[styles.infoValue, { textAlign: 'center' }]}>
+                                    {selectedDate.format('YYYY-MM-DD')}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.navButton, { backgroundColor: theme.colors.primary }]}
+                            onPress={goToNextWeek}
+                        >
+                            <MaterialIcons name="keyboard-arrow-right" size={24} color="#fff" style={{ paddingHorizontal: 4 }} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.weekNavigationContainer}>
+
+
                         <FlatList
                             data={weekDates}
                             renderItem={renderDayItem}
@@ -137,16 +170,11 @@ const ParentScheduleScreen: FC = () => {
                             contentContainerStyle={styles.weekContainer}
                             snapToInterval={width * 0.25}
                             ItemSeparatorComponent={() => <TouchableOpacity style={{ width: 10 }} />}
-                            ListHeaderComponent={ <View style={{ width: 4 }} />}
-                            ListFooterComponent={<View style={{ width: 4}} />}
+                            ListHeaderComponent={<View style={{ width: 4 }} />}
+                            ListFooterComponent={<View style={{ width: 4 }} />}
                         />
-                        
-                        <TouchableOpacity 
-                            style={styles.navButton} 
-                            onPress={goToNextWeek}
-                        >
-                            <MaterialIcons name="keyboard-arrow-right" size={24} color="#fff" style={{ paddingHorizontal: 4 }}     />
-                        </TouchableOpacity>
+
+
                     </View>
                 </View>
 
@@ -354,7 +382,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
     },
-    navButton: { 
+    navButton: {
         height: 50,
         borderRadius: 20,
         backgroundColor: '#3498DB',
@@ -374,6 +402,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FFFFFF',
     },
+    containBtnChangeDate: {
+        flexDirection: 'row',
+        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+        justifyContent: 'space-between'
+    }
 });
 
 export default ParentScheduleScreen;

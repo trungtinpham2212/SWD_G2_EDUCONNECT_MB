@@ -7,7 +7,7 @@ import { SIZES } from '@/constants';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainStackParamList } from '@/types/navigation';
-import { PeriodTeacher, ScheduleQueryRequest, teacherService } from '@/api';
+import { Period, ScheduleTeacherQueryRequest, teacherService } from '@/api';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
@@ -24,12 +24,12 @@ const TeacherScheduleScreen: React.FC = () => {
   const [currentWeek, setCurrentWeek] = useState(moment().startOf('week'));
   const [showDatePicker, setShowDatePicker] = useState(false);
  
-  const [schedule, setSchedule] = useState<PeriodTeacher[]>([]);
+  const [schedule, setSchedule] = useState<Period[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { authState } = useAuth(); 
-  const teacherId = authState.user?.teacherId!;
+  const teacherId = authState.user?.teacherId!; 
 
  
 
@@ -63,9 +63,8 @@ const TeacherScheduleScreen: React.FC = () => {
       try {
         // const startDate = currentWeek.format('YYYY-MM-DD');
         // const endDate = moment(currentWeek).endOf('week').format('YYYY-MM-DD');
-        const date = selectedDate.format('YYYY-MM-DD');
-        console.log('Week range:', date);
-        const payload: ScheduleQueryRequest = {
+        const date = selectedDate.format('YYYY-MM-DD'); 
+        const payload: ScheduleTeacherQueryRequest = {
           date,
           teacherId
         };
@@ -196,7 +195,7 @@ const TeacherScheduleScreen: React.FC = () => {
   );
 };
 
-const RenderScheduleItem = memo(({ item }: { item: PeriodTeacher }) => {
+const RenderScheduleItem = memo(({ item }: { item: Period }) => {
   const theme = useTheme();
   const navigation: NavigationProp<MainStackParamList> = useNavigation();
 
@@ -416,8 +415,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-    // marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-    backgroundColor: 'red'
+    // marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE, 
   },
   navButton: {
     height: 50,

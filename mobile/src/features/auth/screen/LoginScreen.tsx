@@ -31,17 +31,19 @@ const LoginScreen = () => {
   const onSubmit = async (data: FormLoginRequest) => {  
     try { 
       setIsLoading(true);
-      const res = await loginService(data);  
-      if ('token' in res) { 
+      const res = await loginService(data);   
+      if ('token' in res) {  
+
         await login(res.token, {
           email: res.email,
           userName: res.userName,
           roleId: Number(res.roleId),
           userId: Number(res.userId),
-          teacherId: res.teacherid,
+          teacherId: res.teacherId,
           fullname: res.fullname,
           phoneNumber: res.phoneNumber,
-          address: res.address
+          address: res.address,
+          avatarURL: res.avatarURL   
         });  
       } else {
         console.log("Login failed:");

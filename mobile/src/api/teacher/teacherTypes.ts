@@ -1,10 +1,10 @@
 
-export type ScheduleQueryRequest = {
+export type ScheduleTeacherQueryRequest = {
     date: string, 
     teacherId: number
 }
 
-export type PeriodTeacher = {
+export type Period = {
     periodid : number | null,
     subjectid: number | null,
     periodno: number | null,

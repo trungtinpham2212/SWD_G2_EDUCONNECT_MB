@@ -10,10 +10,11 @@ type LoginSuccess = {
   email: string;
   roleId: number;
   userId: string;
-  teacherid: number | null;
+  teacherId: number | null;
   fullname?: string;
   phoneNumber?: string;
   address?: string;
+  avatarURL: string | null;
 };
 
 type LoginFail = { 
@@ -30,4 +31,5 @@ export type UserData ={
   fullname?: string;
   phoneNumber?: string;
   address?: string;
+  avatarURL: string | null;
 }
