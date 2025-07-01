@@ -12,7 +12,7 @@ import ChildTeachersScreen from '@/features/childTeachers';
 import ClassStudentScreen from '@/features/myClass';
 import { useTheme } from 'react-native-paper';
 import EvaluationScreen from '@/features/evaluation';
-import EditProfileScreen from '@/features/editProfile';
+import EditProfileScreen from '@/features/editProfile'; 
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -42,8 +42,8 @@ const MainStack: React.FC = () => {
         <>
           <Stack.Screen name='ParentSchedule' component={ParentScheduleScreen} />
           <Stack.Screen name='Chatbot' component={ChatbotScreen} options={{ headerShown: false }} />
-          <Stack.Screen name='ParentReport' component={ParentReportScreen} options={{ headerShown: false }} />
-          <Stack.Screen name='ChildTeachers' component={ChildTeachersScreen} />
+          <Stack.Screen name='ParentReport' component={ParentReportScreen}  />
+          <Stack.Screen name='ChildTeachers' component={ChildTeachersScreen} /> 
         </>
       ) : (
         <>

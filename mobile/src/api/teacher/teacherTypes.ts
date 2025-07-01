@@ -14,5 +14,10 @@ export type Period = {
     className: string | null,
     subjectName: string | null,
     teacherName: string | null
-
 } 
+
+export type Activity = {
+    activityid: number;
+    isnegative: boolean;
+    activitytype: boolean;
+}

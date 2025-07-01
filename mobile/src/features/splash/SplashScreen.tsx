@@ -2,20 +2,27 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ActivityIndicator, useTheme } from "react-native-paper";
 
-const SplashScreen: React.FC = () => {
-    const { colors } = useTheme();
-    return (
+type SplashScreenProps = {
+  loading: boolean;
+};
+
+const SplashScreen: React.FC<SplashScreenProps> = ({ loading }) => {
+  const { colors } = useTheme(); 
+  return (
+    <>
+      {loading && (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.surface }]}>My App</Text>
-            <ActivityIndicator
-                animating={true}
-                size="large"
-                color={colors.primary}
-                style={styles.indicator}
-            />
-            <Text style={[styles.subtitle, { color: colors.surface }]}>Loading...</Text>
+          <ActivityIndicator
+            animating={true}
+            size="large"
+            color={colors.primary}
+            style={styles.indicator}
+          />
+          <Text style={[styles.subtitle, { color: colors.surface }]}>Loading...</Text>
         </View>
-    )
+      )}
+    </>
+  )
 }
 
 const styles = StyleSheet.create({

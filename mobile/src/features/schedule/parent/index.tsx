@@ -1,11 +1,14 @@
-import React, { FC, useMemo, useState } from 'react';
-import { Dimensions, FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { FC, memo, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Dimensions, FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { SIZES } from '@/constants';
 import moment from 'moment';
 import { Picker } from '@react-native-picker/picker';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useAuth } from '@/features/auth/context/AuthContext';
+import { Period, ScheduleStudentQueryRequest, Student, parentService } from '@/api';
+
 
 
 const ParentScheduleScreen: FC = () => {
@@ -13,8 +16,19 @@ const ParentScheduleScreen: FC = () => {
     // const [currentDate] = useState(moment());
     const [selectedDate, setSelectedDate] = useState(moment());
     const [currentWeek, setCurrentWeek] = useState(moment().startOf('week'));
-    const [value, setValue] = useState<string>('Dao Ngoc Hoang');
+
+    const [students, setStudents] = useState<Student[]>([]);
+    const [selectedName, setSelectedName] = useState<string>('');
+    const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+
     const [showDatePicker, setShowDatePicker] = useState(false);
+
+    const [schedule, setSchedule] = useState<Period[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const { authState } = useAuth();
+    const parentId = authState.user?.userId;
 
 
     const weekDates = useMemo(() => {
@@ -42,18 +56,7 @@ const ParentScheduleScreen: FC = () => {
         setCurrentWeek(newWeek);
         // Reset selected date to first day of new week
         setSelectedDate(newWeek);
-    };
-
-    const todaySchedule = [
-        { subject: 'Mathematics' },
-        { subject: 'Physics' },
-        { subject: 'Chemistry' },
-        { subject: 'Biology' },
-        { subject: 'Biology' },
-        { subject: 'Biology' },
-        { subject: 'Biology' },
-        { subject: 'Biology' },
-    ];
+    }; 
 
     const renderDayItem = ({ item, index }: { item: any, index: number }) => (
         <TouchableOpacity
@@ -71,19 +74,7 @@ const ParentScheduleScreen: FC = () => {
             <Text style={styles.dayText}>{item.date}</Text>
         </TouchableOpacity>
     );
-    const renderScheduleItem = ({ item, index }: { item: any, index: number }) => (
-        <TouchableOpacity>
-            <View style={styles.scheduleItem}>
-                <View style={{ width: '40%' }}>
-                    <Text style={styles.timeText}>07:30 - 08:15</Text>
-                </View>
-                <View style={{ width: '60%' }}>
-                    <Text style={styles.subjectText}>{item.subject}</Text>
-                    <Text style={styles.subjectTextSecondary}>Nguyễn Văn A</Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
+
     const onDateChange = (event: DateTimePickerEvent, date?: Date) => {
         setShowDatePicker(false);
 
@@ -93,6 +84,65 @@ const ParentScheduleScreen: FC = () => {
             setCurrentWeek(selectedMoment.clone().startOf('isoWeek'));
         }
     };
+
+    const fetchScheduleForClass = async (classId: number, date: string) => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const payload: ScheduleStudentQueryRequest = {
+                date,
+                classId: classId,
+            }; 
+            const schedule = await parentService.getStudentSchedule(payload);
+            setSchedule(schedule);
+        } catch (error) {
+            console.error('Error fetching schedule:', error);
+            setError('Failed to fetch schedule');
+            setSchedule([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            if (!parentId) return;
+            try {
+                const data = await parentService.getStudentsByParentId(parentId);
+                setStudents(data);
+                if (data.length > 0) {
+                    const firstStudent = data[0];
+                    const classId = Number(firstStudent.classid);
+                    setSelectedClassId(classId);
+                    setSelectedName(data[0].name);
+
+                    await fetchScheduleForClass(classId, selectedDate.format('YYYY-MM-DD'));
+                }
+            } catch (error) {
+                console.error('Error fetching students:', error);
+            }
+        };
+
+        fetchStudents();
+    }, [parentId]);
+
+    const handleStudentChange = async (studentId: number) => {
+        
+        const selectedStudent = students.find(s => Number(s.studentid) === studentId);
+        if(selectedStudent){
+            setSelectedClassId(selectedStudent.classid);
+            setSelectedName(selectedStudent.name);
+            await fetchScheduleForClass(selectedStudent.classid, selectedDate.format('YYYY-MM-DD'));
+        }  
+    };
+
+    useEffect(() => {
+        if (selectedClassId && selectedDate) {
+            fetchScheduleForClass(selectedClassId, selectedDate.format('YYYY-MM-DD'));
+        }
+    }, [selectedDate]);
+
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
             {/* <View style={styles.header}>
@@ -114,14 +164,15 @@ const ParentScheduleScreen: FC = () => {
                 <View style={styles.pickerContainer}>
                     <View style={styles.pickerWrapper}>
                         <Picker
-                            selectedValue={value}
-                            onValueChange={(itemValue) => setValue(itemValue)}
+                            selectedValue={selectedName}
+                            onValueChange={(value) => handleStudentChange(Number(value))}
+
                             style={styles.picker}
                             dropdownIconColor="#666"
                         >
-                            <Picker.Item label="Dao Ngoc Hoang" value="Dao Ngoc Hoang" />
-                            <Picker.Item label="Nguyen Van A" value="Nguyen Van A" />
-                            <Picker.Item label="Tran Thi B" value="Tran Thi B" />
+                            {students.map((student) => (
+                                <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
+                            ))}
                         </Picker>
                     </View>
                 </View>
@@ -180,23 +231,62 @@ const ParentScheduleScreen: FC = () => {
 
                 {/* Today's Schedule */}
                 <View style={styles.scheduleContainer}>
-                    <Text style={styles.scheduleTitle}>
+                    <Text style={[styles.scheduleTitle, { color: theme.colors.onSurface }]}>
                         Schedule for {selectedDate.format('dddd, MMMM D')}
                     </Text>
-                    <FlatList
-                        data={todaySchedule}
-                        renderItem={renderScheduleItem}
-                        keyExtractor={(_, index) => index.toString()}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.scheduleList}
-                        style={styles.scheduleFlatList}
-                        nestedScrollEnabled={true}
-                    />
+                    {loading ? (
+                        <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
+                    ) : error ? (
+                        <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
+                    ) : schedule.length === 0 ? (
+                        <View>
+                            <Image style={styles.imgNodata} source={{ uri: 'https://cdni.iconscout.com/illustration/premium/thumb/woman-with-no-appointment-illustration-download-in-svg-png-gif-file-formats--waiting-issue-empty-state-pack-people-illustrations-10922122.png' }} />
+                            <Text style={[styles.noDataText, { color: theme.colors.onSurface }]}>
+                                No schedule available
+                            </Text>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={schedule}
+                            renderItem={({ item }) => <RenderScheduleItem item={item} />}
+                            keyExtractor={(item) => item.periodid?.toString() || Math.random().toString()}
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={styles.scheduleList}
+                            style={styles.scheduleFlatList}
+                        />
+                    )}
                 </View>
             </View>
         </View>
     )
 }
+const RenderScheduleItem = memo(({ item }: { item: Period }) => {
+    const theme = useTheme();
+    const formatTime = (periodDate: string) => {
+        if (!periodDate) return 'N/A';
+        const startTime = moment(periodDate).format('HH:mm');
+        const endTime = moment(periodDate).add(45, 'minutes').format('HH:mm');
+        return `${startTime} - ${endTime}`;
+    };
+    return (
+        <TouchableOpacity>
+            <View style={styles.scheduleItem}>
+                <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={[styles.periodText, { color: theme.colors.onSurface }]}>
+                        {item.periodno}
+                    </Text>
+                    <Text style={[styles.timeText, { color: theme.colors.primary }]}>
+                        {formatTime(item.perioddate)}
+                    </Text>
+                </View>
+                <View style={{ width: '60%' }}>
+                    <Text style={styles.subjectText}>{item.subjectName}</Text>
+                    <Text style={styles.subjectTextSecondary}>{item.teacherName}</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    )
+});
 
 
 const { width } = Dimensions.get('window');
@@ -225,6 +315,7 @@ const styles = StyleSheet.create({
     },
     infoContainer: {
         marginBottom: 15,
+        display: 'none'
     },
     infoRow: {
         flexDirection: 'row',
@@ -406,7 +497,26 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
         justifyContent: 'space-between'
-    }
+    },
+    periodText: {
+        fontSize: 20,
+        fontWeight: '700',
+    },
+
+    errorText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    noDataText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    imgNodata: {
+        width: '100%',
+        height: 300
+    },
 });
 
 export default ParentScheduleScreen;

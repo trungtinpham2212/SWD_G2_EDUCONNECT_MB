@@ -21,6 +21,7 @@ export type MainStackParamList = {
   ClassStudent: undefined;
   Evaluation: undefined;
   EditProfile : undefined;
+  NotificationTest: undefined;
 };
 
 export type BottomTabParamList = {

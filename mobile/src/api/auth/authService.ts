@@ -3,12 +3,8 @@ import axiosInstance from '@/api/axiosConfig';
 
 export const loginService = async (data: FormLoginRequest): Promise<LoginResponse> => {
     try {
-        const response = await axiosInstance.post('/auth/login', data); 
-        if (response.data.userId === 1) {
-            return {
-                message: 'Invalid username or password'
-            }
-        }
+        const response = await axiosInstance.post('/api/user-accounts/login', data); 
+         
         return response.data;
     } catch (error) {
         return {

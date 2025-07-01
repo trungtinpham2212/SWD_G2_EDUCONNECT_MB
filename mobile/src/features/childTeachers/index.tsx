@@ -1,17 +1,57 @@
+import { parentService, Student } from "@/api";
 import { COLORS, SIZES } from "@/constants";
 import MainLayout from "@/layouts/MainLayout";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useTheme } from "react-native-paper";
+import { useAuth } from '@/features/auth/context/AuthContext';
+
 
 const ChildTeachersScreen: React.FC = () => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const [selectedStudent, setSelectedStudent] = useState('Hoang DB');
+    
+    const [students, setStudents] = useState<Student[]>([]);
+    const [selectedName, setSelectedName] = useState<string>('');
+    const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
 
+    
+    const { authState } = useAuth();
+    const parentId = authState.user?.userId;
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            if (!parentId) return;
+            try {
+                const data = await parentService.getStudentsByParentId(parentId);
+                setStudents(data);
+                if (data.length > 0) {
+                    const firstStudent = data[0];
+                    const classId = Number(firstStudent.classid);
+                    setSelectedClassId(classId);
+                    setSelectedName(data[0].name);
+ 
+                }
+            } catch (error) {
+                console.error('Error fetching students:', error);
+            }
+        };
+
+        fetchStudents();
+    }, [parentId]);
+
+    const handleStudentChange = async (studentId: number) => {
+        
+        const selectedStudent = students.find(s => Number(s.studentid) === studentId);
+        if(selectedStudent){
+            setSelectedClassId(selectedStudent.classid);
+            setSelectedName(selectedStudent.name);
+            // await fetchScheduleForClass(selectedStudent.classid, selectedDate.format('YYYY-MM-DD'));
+        }  
+    };
 
 
     return ( 
@@ -30,12 +70,12 @@ const ChildTeachersScreen: React.FC = () => {
                 <View style={styles.mainContent}>
                     <View style={styles.dropdownRow}>
                         <Picker
-                            selectedValue={selectedStudent}
-                            onValueChange={(itemValue) => setSelectedStudent(itemValue)}
-
+                            selectedValue={selectedName}
+                            onValueChange={(value) => handleStudentChange(Number(value))}
                         >
-                            <Picker.Item label="Hoang DB" value="Hoang DB" />
-                            <Picker.Item label="Nguyen Van A" value="Nguyen Van A" />
+                            {students.map((student) => (
+                                <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
+                            ))}
                         </Picker>
                     </View>
                     <View style={styles.listCard}>

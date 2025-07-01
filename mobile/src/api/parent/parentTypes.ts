@@ -4,6 +4,14 @@ export type ScheduleStudentQueryRequest = {
     classId: number
 }
 
+type Parent = {
+    userid: number;
+    fullname: string;
+    email: string;
+    phonenumber: string;
+    address: string;
+}
+
 export type Student = {
     studentid: number;
     name: string;
@@ -11,6 +19,7 @@ export type Student = {
     parentid: number;
     classid: number;
     class: StudentClass | null;
+    parent: Parent | null;
 }
 
 type StudentClass = {

@@ -60,9 +60,7 @@ const TeacherScheduleScreen: React.FC = () => {
     const fetchSchedule = async () => {
       setLoading(true);
       setError(null);
-      try {
-        // const startDate = currentWeek.format('YYYY-MM-DD');
-        // const endDate = moment(currentWeek).endOf('week').format('YYYY-MM-DD');
+      try { 
         const date = selectedDate.format('YYYY-MM-DD'); 
         const payload: ScheduleTeacherQueryRequest = {
           date,

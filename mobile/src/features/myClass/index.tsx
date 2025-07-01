@@ -1,29 +1,71 @@
 import { COLORS, SIZES } from "@/constants";
 import { useNavigation } from "@react-navigation/native";
-import { useState, useEffect } from "react";
-import { Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableWithoutFeedback } from "react-native";
+import { useState, useEffect, memo } from "react";
+import { ActivityIndicator, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import { View } from "react-native";
 import { useTheme } from "react-native-paper";
+import { useAuth } from '@/features/auth/context/AuthContext';
+import { Student, teacherService } from "@/api";
+import { FlatList } from "react-native";
+
+const windowHeight = Dimensions.get('window').height;
 
 const ClassStudentScreen: React.FC = () => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const [selectedStudent, setSelectedStudent] = useState('Hoang DB');
     const [name, setName] = useState('');
     const [debouncedName, setDebouncedName] = useState(name);
+
+    const [students, setStudents] = useState<Student[]>([]);
+    const [className, setClassName] = useState<string>('');
+
+    const { authState } = useAuth();
+    const teacherId = authState.user?.teacherId!;
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedName(name);
-        }, 500); // 500ms debounce
+        }, 500);
 
         return () => {
             clearTimeout(handler);
         };
     }, [name]);
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            if (!teacherId) return;
+
+            setLoading(true);
+            setError(null);
+            try {
+                console.log(teacherId);
+                const data = await teacherService.getStudentsHomeRoom(teacherId);
+                if (Array.isArray(data) && data.length > 0) {
+                    const firstStudent = data[0];
+                    const className = firstStudent?.class?.classname ?? 'Unknown Class';
+
+                    setClassName(className);
+                    setStudents(data);
+                } else {
+                    setClassName('No Class Found');
+                    setStudents([]);
+                }
+            } catch (err) {
+                setError('Failed to load Student');
+                console.error('Error fetching student:', err);
+                setStudents([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStudents();
+    }, [teacherId]);
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={[styles.container, { backgroundColor: theme.colors.surface }]}>
                 <View style={styles.mainContent}>
@@ -32,7 +74,7 @@ const ClassStudentScreen: React.FC = () => {
                     { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline, },
                     ]}>
                         <Text style={[styles.infoValue, { color: theme.colors.onSurface, },]} >
-                            Class: 10A1
+                            Class: {className}
                         </Text>
                     </View>
                     <View>
@@ -49,37 +91,67 @@ const ClassStudentScreen: React.FC = () => {
                             placeholderTextColor={theme.colors.onSurfaceVariant} // Tách ra khỏi style
                             value={name}
                             onChangeText={setName}
+
                         />
                     </View>
-                    <View style={styles.listCard}>
-                        <View style={styles.card}>
-                            <View style={styles.cardHeader}>
-                                <Image source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} style={styles.cardImage} />
-                                <View>
-                                    <Text style={[styles.cardName, { color: theme.colors.primary }]}>Tabatha McDuffy</Text>
-                                    <Text style={[styles.cardSubject, { color: theme.colors.onBackground }]}>19/06/2004</Text>
-                                </View>
+                    <View style={[styles.listCard, { height: windowHeight * 0.7 }]}>
+                        {loading ? (
+                            <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
+                        ) : error ? (
+                            <View>
+                                <Image style={styles.imgNodata} source={{ uri: 'https://cdni.iconscout.com/illustration/premium/thumb/woman-with-no-appointment-illustration-download-in-svg-png-gif-file-formats--waiting-issue-empty-state-pack-people-illustrations-10922122.png' }} />
+                                <Text style={[styles.noDataText, { color: theme.colors.onSurface }]}>
+                                    No schedule available
+                                </Text>
                             </View>
-                            <View style={styles.cardContent}>
-                                <View style={styles.cardContentItem}>
-                                    <Text style={[styles.cardContentItemTextLeft, { color: theme.colors.onSurface }]}>Phone:</Text>
-                                    <Text style={[styles.cardContentItemTextRight, { color: theme.colors.onBackground }]}>01234567890</Text>
-                                </View>
-                                <View style={styles.cardContentItem}>
-                                    <Text style={[styles.cardContentItemTextLeft, { color: theme.colors.onSurface }]}>Parent Name:</Text>
-                                    <Text style={[styles.cardContentItemTextRight, { color: theme.colors.onBackground }]}
-                                      numberOfLines={1}   ellipsizeMode="tail"
-                                    >Nock sssjj adsbfhasdbjsdjkfasdjk sdahfhasdhds</Text>
-                                </View>
-                            </View>
-                        </View>
+                        ) : (
+
+                            <FlatList
+                                data={students}
+                                renderItem={({ item }) => <RenderItemStudent item={item} />}
+                                keyExtractor={(item) => item.studentid.toString()}
+                                contentContainerStyle={styles.scheduleList}
+                                showsVerticalScrollIndicator={true}
+                            />
+                        )
+                        }
 
                     </View>
+
                 </View>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
     )
 };
+
+const RenderItemStudent = memo(({ item }: { item: Student }) => {
+    const theme = useTheme();
+    return (
+        <TouchableWithoutFeedback>
+            <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                    <Image source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} style={styles.cardImage} />
+                    <View>
+                        <Text style={[styles.cardName, { color: theme.colors.primary }]}>{item.name}</Text>
+                        <Text style={[styles.cardSubject, { color: theme.colors.onBackground }]}>{item.dateofbirth.split('T')[0]}</Text>
+                    </View>
+                </View>
+                <View style={styles.cardContent}>
+                    <View style={styles.cardContentItem}>
+                        <Text style={[styles.cardContentItemTextLeft, { color: theme.colors.onSurface }]}>Phone:</Text>
+                        <Text style={[styles.cardContentItemTextRight, { color: theme.colors.onBackground }]}>{item.parent?.phonenumber}</Text>
+                    </View>
+                    <View style={styles.cardContentItem}>
+                        <Text style={[styles.cardContentItemTextLeft, { color: theme.colors.onSurface }]}>Parent Name: </Text>
+                        <Text style={[styles.cardContentItemTextRight, { color: theme.colors.onBackground }]}
+                            numberOfLines={1} ellipsizeMode="tail"
+                        >{item.parent?.fullname}</Text>
+                    </View>
+                </View>
+            </View>
+        </TouchableWithoutFeedback>
+    )
+});
 
 
 const styles = StyleSheet.create({
@@ -118,7 +190,6 @@ const styles = StyleSheet.create({
         minWidth: 120,
     },
     listCard: {
-
     },
     card: {
         borderWidth: 1,
@@ -170,7 +241,7 @@ const styles = StyleSheet.create({
     },
     cardContentItemTextRight: {
         fontSize: 16,
-        color: '#666', 
+        color: '#666',
         width: '60%'
     },
     infoLabel: {
@@ -207,6 +278,26 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 10,
         marginBottom: 12,
+    },
+    studentsFlatList: {
+    },
+    scheduleList: {
+        paddingBottom: 0,
+    },
+
+    errorText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    noDataText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    imgNodata: {
+        width: '100%',
+        height: 300
     },
 });
 

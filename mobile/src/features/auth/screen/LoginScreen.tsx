@@ -31,9 +31,8 @@ const LoginScreen = () => {
   const onSubmit = async (data: FormLoginRequest) => {  
     try { 
       setIsLoading(true);
-      const res = await loginService(data);   
-      if ('token' in res) {  
-
+      const res = await loginService(data);  
+      if ('token' in res) {   
         await login(res.token, {
           email: res.email,
           userName: res.userName,
@@ -46,7 +45,7 @@ const LoginScreen = () => {
           avatarURL: res.avatarURL   
         });  
       } else {
-        console.log("Login failed:");
+        console.log("Login failed: dd");
         setErrorResponse(res.message);
       }
     } catch (error) {
