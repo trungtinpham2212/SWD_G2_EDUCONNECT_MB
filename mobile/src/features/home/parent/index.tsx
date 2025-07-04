@@ -28,7 +28,7 @@ const ParentHomeScreen: React.FC = () => {
                     </Text>
                     <TouchableOpacity
                         style={styles.notificationButton}
-                        onPress={() => Alert.alert('Notifications', 'No new notifications')}
+                        onPress={() => navigation.navigate('NotificationTest')}
                     >
                         <FontAwesome5 name="bell" size={24} color={theme.colors.onSurface} />
                     </TouchableOpacity>

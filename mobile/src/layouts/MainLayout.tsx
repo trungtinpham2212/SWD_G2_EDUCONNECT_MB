@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Keyboard, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, StatusBar, StyleSheet, TouchableWithoutFeedback, View, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "react-native-paper";
 
@@ -12,14 +12,16 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     const theme = useTheme();
 
     useEffect(() => {
-        StatusBar.setBackgroundColor(theme.colors.surface || '#000');
+        if (Platform.OS === 'android') {
+            StatusBar.setBackgroundColor(theme.colors.surface || '#000');
+        }
         StatusBar.setBarStyle(theme.dark ? 'light-content' : 'dark-content');
     }, [theme]);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <SafeAreaView style={[styles.safeArea, { flex: 1 }]}>
-                <View style={styles.container}>
+            <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.surface }]}>
+                <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
                     {children}
                 </View>
             </SafeAreaView>

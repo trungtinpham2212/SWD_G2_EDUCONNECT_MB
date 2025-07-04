@@ -34,7 +34,14 @@
           "icon": "./src/assets/icon.png",
           "color": "#ffffff"
         }
-      ]
-    ]
+      ],
+       "@react-native-firebase/app"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "89084cd3-b115-46a0-a44e-8e8a73bb2cde"
+      }
+    },
+    "owner": "acnbokhb12"
   }
 }

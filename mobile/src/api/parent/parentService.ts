@@ -1,5 +1,5 @@
-import {Student, ScheduleStudentQueryRequest} from '@/api/parent/parentTypes';
-import { Period } from "@/api/teacher/teacherTypes";
+import {Student, ScheduleStudentQueryRequest, StudentReportQueryRequest,PagedStudentReportResponse} from '@/api/parent/parentTypes';
+import { PeriodResponse} from "@/api/teacher/teacherTypes";
 import { parentApi } from '@/api/parent/parentApi';
 
 export const parentService = {
@@ -11,12 +11,20 @@ export const parentService = {
             return [];
         }
     },
-    getStudentSchedule : async(payload: ScheduleStudentQueryRequest) : Promise<Period[]> => {
+    getStudentSchedule : async(payload: ScheduleStudentQueryRequest) : Promise<PeriodResponse | null> => {
         try{
             return await parentApi.getStudentSchedule(payload);
         }catch(err){
             console.error("Shedules get failed:", err);
-            return [];
+            return null;
+        }
+    },
+    getStudentReports : async(payload:StudentReportQueryRequest) : Promise<PagedStudentReportResponse | null> => {
+        try{
+            return await parentApi.getStudentReports(payload);
+        }catch(err){
+            console.error("Shedules get failed:", err);
+            return null;
         }
     }
 }

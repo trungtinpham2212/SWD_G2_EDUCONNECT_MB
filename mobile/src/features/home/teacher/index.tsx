@@ -1,5 +1,5 @@
 import MainLayout from "@/layouts/MainLayout";
-import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView, Pressable, Dimensions } from "react-native";
+import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView, Pressable, Dimensions, Image, Animated, FlatList } from "react-native";
 import { useTheme } from "react-native-paper";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { COLORS, SIZES } from "@/constants";
@@ -16,82 +16,59 @@ const screenWidth = Dimensions.get('window').width;
 const TeacherHomeScreen: React.FC = () => {
     const navigation: NavigationProp<MainStackParamList> = useNavigation();
     const { authState } = useAuth();
-
     const theme = useTheme();
+
+    // Navigation buttons data
+    const navButtons = [
+        {
+            label: 'Teacher Schedule',
+            icon: <MaterialCommunityIcons name="timetable" size={36} color={theme.colors.primary} />, // icon color theme
+            screen: 'TeacherSchedule',
+        },
+        {
+            label: 'Homeroom Student',
+            icon: <Octicons name="repo" size={36} color={theme.colors.primary} />, // icon color theme
+            screen: 'ClassStudent',
+        },
+        {
+            label: 'Report',
+            icon: <MaterialCommunityIcons name="folder-information-outline" size={36} color={theme.colors.primary} />, // icon color theme
+            screen: 'TeacherReport',
+        },
+    ];
 
     return (
         <MainLayout>
-            <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-                <View style={styles.header}>
-                    <Text style={[styles.welcomeText, { color: theme.colors.onSurface }]}>
-                        Hello, {authState.user?.userName || 'User'}
+            <View style={[styles.container, { backgroundColor: theme.colors.surface }]}> 
+                <View style={styles.header}> 
+                    <Text style={[styles.welcomeText, { color: theme.colors.onSurface }]}> 
+                        Xin chào, {authState.user?.userName || 'Giáo viên'}
                     </Text>
                     <TouchableOpacity
                         style={styles.notificationButton}
-                        onPress={() => Alert.alert('Notifications', 'No new notifications')}
+                        onPress={() => navigation.navigate('NotificationTest')}
                     >
-                        <FontAwesome5 name="bell" size={24} color={theme.colors.onSurface} />
+                        <FontAwesome5 name="bell" size={24} color={theme.colors.primary} />
                     </TouchableOpacity>
                 </View>
                 {/* Main Content */}
-                <ScrollView scrollEnabled={true} showsVerticalScrollIndicator={false}>
-                    <View style={styles.mainContent}>
-                        <View style={styles.row}> 
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('TeacherSchedule')}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <MaterialCommunityIcons name="timetable" size={40} color="#333" />
-                                        <Text style={[styles.text]}>Teacher Schedule</Text>
-                                    </View>
-                                </Pressable>
-                            </View> 
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('ClassStudent')}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <Octicons name="repo" size={40} style={{marginRight:6}} color="#333" />        
-                                        <Text style={[styles.text]}>Homeroom Student</Text>
-                                    </View>
-                                </Pressable>
-                            </View>
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => alert("Teacher Information")}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <MaterialCommunityIcons
-                                            name="folder-information-outline"
-                                            size={40}
-                                            color="#333"
-                                        />
-                                        <Text style={[styles.text]}>Report</Text>
-                                    </View>
-                                </Pressable>
-                            </View>
-                        </View>
+                <View style={styles.mainContent}>
+                    <View style={styles.gridRow}>
+                        {navButtons.map((btn, idx) => (
+                            <TouchableOpacity
+                                key={btn.label}
+                                style={styles.gridItem}
+                                activeOpacity={0.85}
+                                onPress={() => navigation.navigate(btn.screen as any)}
+                            >
+                                <View style={[styles.card, { backgroundColor: theme.colors.background, shadowColor: theme.colors.primary+'55' }]}> 
+                                    <View style={styles.iconWrapper}>{btn.icon}</View>
+                                    <Text style={[styles.cardLabel, { color: theme.colors.onSurface }]}>{btn.label}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
                     </View>
-                </ScrollView>
+                </View>
             </View>
         </MainLayout>
     );
@@ -109,44 +86,55 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#a1a1a1',
+        paddingVertical: 18,
+        borderBottomWidth: 1.5,
+        borderBottomColor: '#e0e0e0',
+        marginBottom: 8,
     },
     welcomeText: {
         fontSize: 22,
-        fontWeight: '500',
+        fontWeight: '700',
+        letterSpacing: 0.2,
     },
     notificationButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: 'transparent',
     },
     mainContent: {
-        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE
+        flex: 1,
+        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+        marginTop: 16,
     },
-    mainText: {
-        fontSize: 20,
-    },
-
-    row: {
-        marginTop: 8,
-    },
-    containBtnNavigation: {
-        padding: 4,
-        width: '100%'
-    },
-    button: {
-        borderRadius: 4,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        textAlign: 'center', 
-    },
-    containInsidePress: {
+    gridRow: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    gridItem: {
+        width: '48%',
+        marginBottom: 18,
+    },
+    card: {
+        borderRadius: 16,
+        paddingVertical: 32,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 30
-    }
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.13,
+        shadowRadius: 8,
+        elevation: 4,
+        backgroundColor: '#fff',
+    },
+    iconWrapper: {
+        marginBottom: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    cardLabel: {
+        fontSize: 16,
+        fontWeight: '600',
+        textAlign: 'center',
+        letterSpacing: 0.1,
+    },
 });

@@ -13,6 +13,7 @@ import ClassStudentScreen from '@/features/myClass';
 import { useTheme } from 'react-native-paper';
 import EvaluationScreen from '@/features/evaluation';
 import EditProfileScreen from '@/features/editProfile'; 
+import NotificationTest from '@/features/notification/NotificationTest';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -44,6 +45,7 @@ const MainStack: React.FC = () => {
           <Stack.Screen name='Chatbot' component={ChatbotScreen} options={{ headerShown: false }} />
           <Stack.Screen name='ParentReport' component={ParentReportScreen}  />
           <Stack.Screen name='ChildTeachers' component={ChildTeachersScreen} /> 
+          <Stack.Screen name='NotificationTest' component={NotificationTest} />
         </>
       ) : (
         <>

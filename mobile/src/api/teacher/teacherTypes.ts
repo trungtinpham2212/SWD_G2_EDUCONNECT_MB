@@ -2,6 +2,8 @@
 export type ScheduleTeacherQueryRequest = {
     date: string, 
     teacherId: number
+    page: number | 1;
+    pageSize: number | 30;
 }
 
 export type Period = {
@@ -20,4 +22,12 @@ export type Activity = {
     activityid: number;
     isnegative: boolean;
     activitytype: boolean;
+}
+
+export type PeriodResponse = {
+    items: Period[],
+    totalCount: number,
+    pageNumber: number,
+    pageSize: number,
+    totalPages: number
 }

@@ -26,21 +26,20 @@ const BottomTabNavigator = () => {
         tabBarStyle: {
           backgroundColor: COLORS.MAIN_APP_COLOR,
           height: 60,
-          paddingVertical: 5,
-          justifyContent: 'center',
+          paddingVertical: 10, 
         },
         tabBarLabelStyle: {
           marginTop: 0,
-          fontSize: 11,
-          marginBottom: 8,
+          fontSize: 11, 
           fontWeight: '700',
+          justifyContent:'center',
+          marginBottom:8
+
         },
         tabBarIcon: ({ color, size }) => { 
           switch (route.name) { 
             case 'Home':
-              return <FontAwesome5 name="home" size={size} color={color} />;
-            case 'Academic':
-              return <MaterialIcons name="menu-book" size={size} color={color} />  
+              return <FontAwesome5 name="home" size={24} color={color} />; 
             case 'Settings':
               return <AntDesign name="setting" size={24} color={color} />   
             default:

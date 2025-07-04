@@ -9,7 +9,7 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { Period, ScheduleStudentQueryRequest, Student, parentService } from '@/api';
 
-
+const { width } = Dimensions.get('window');
 
 const ParentScheduleScreen: FC = () => {
     const theme = useTheme();
@@ -93,9 +93,13 @@ const ParentScheduleScreen: FC = () => {
             const payload: ScheduleStudentQueryRequest = {
                 date,
                 classId: classId,
+                page: 1,
+                pageSize:30,
             }; 
             const schedule = await parentService.getStudentSchedule(payload);
-            setSchedule(schedule);
+            if(schedule){
+                setSchedule(schedule.items);
+            }
         } catch (error) {
             console.error('Error fetching schedule:', error);
             setError('Failed to fetch schedule');
@@ -142,6 +146,261 @@ const ParentScheduleScreen: FC = () => {
             fetchScheduleForClass(selectedClassId, selectedDate.format('YYYY-MM-DD'));
         }
     }, [selectedDate]);
+
+    const styles = useMemo(() => StyleSheet.create({
+        container: {
+            flex: 1,
+        },
+        header: {
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+            paddingVertical: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.colors.outline || '#E8E8E8',
+        },
+        welcomeText: {
+            fontSize: 22,
+            fontWeight: '500',
+        },
+        mainContent: {
+            flex: 1,
+            marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+            marginTop: 20,
+        },
+        infoContainer: {
+            marginBottom: 15,
+            display: 'none'
+        },
+        infoRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 10,
+        },
+        infoItem: {
+            flex: 1,
+        },
+        infoLabel: {
+            fontSize: 14,
+            fontWeight: '600',
+            marginBottom: 8,
+            color: theme.colors.onSurface || '#333',
+        },
+        infoValueContainer: {
+            backgroundColor: theme.colors.background || '#FFFFFF',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.colors.outline || '#E8E8E8',
+            padding: 12,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 1,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            elevation: 2,
+        },
+        infoValue: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.colors.onSurface || '#2C3E50',
+        },
+        pickerContainer: {
+            marginBottom: 20,
+        },
+        pickerLabel: {
+            fontSize: 16,
+            fontWeight: '600',
+            marginBottom: 8,
+            color: theme.colors.onSurface || '#333',
+        },
+        pickerWrapper: {
+            backgroundColor: theme.colors.background || '#FFFFFF',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.colors.outline || '#E8E8E8',
+            overflow: 'hidden',
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 1,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            elevation: 2,
+        },
+        picker: {
+            height: 'auto',
+            width: '100%',
+            color: theme.colors.onSurface || '#2C3E50',
+        },
+        weekContainer: {
+            paddingVertical: 0,
+        },
+        dayContainer: {
+            alignItems: 'center',
+            paddingHorizontal: 5,
+            paddingVertical: 5,
+            borderRadius: 8,
+            width: width * 0.25,
+            backgroundColor: theme.colors.background || '#FFFFFF',
+            borderWidth: 1,
+            borderColor: theme.colors.outline || '#E8E8E8',
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 1,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            elevation: 2,
+        },
+        todayContainer: {
+            backgroundColor: theme.colors.primary || '#3498DB',
+            borderColor: theme.colors.primary || '#3498DB',
+        },
+        selectedContainer: {
+            backgroundColor: theme.colors.secondary || '#2ECC71',
+            borderColor: theme.colors.secondary || '#2ECC71',
+        },
+        dayText: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: theme.colors.onSurface || '#2C3E50',
+        },
+        todayText: {
+            color: theme.colors.onPrimary || '#FFFFFF',
+        },
+        scheduleContainer: {
+            flex: 1,
+            backgroundColor: theme.colors.background || '#FFFFFF',
+            borderRadius: 12,
+            padding: 15,
+            marginTop: 20,
+            borderWidth: 1,
+            borderColor: theme.colors.outline || '#E8E8E8',
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 1,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            elevation: 2,
+        },
+        scheduleFlatList: {
+            flex: 1,
+        },
+        scheduleList: {
+            paddingBottom: 10,
+        },
+        scheduleItem: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.colors.outline || '#E8E8E8',
+        },
+        timeText: {
+            fontSize: 14,
+            color: theme.colors.onSurfaceVariant || '#7F8C8D',
+        },
+        subjectText: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: theme.colors.onSurface || '#2C3E50',
+        },
+        subjectTextSecondary: {
+            fontSize: 14,
+            color: theme.colors.onSurfaceVariant || '#7F8C8D',
+        },
+        scheduleTitle: {
+            fontSize: 18,
+            fontWeight: '600',
+            marginBottom: 15,
+            color: theme.colors.onSurface || '#2C3E50',
+        },
+        weekNavigationContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: 10, 
+        },
+        navButton: {
+            height: 50,
+            borderRadius: 20,
+            backgroundColor: theme.colors.primary || '#3498DB',
+            justifyContent: 'center',
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 3,
+            paddingHorizontal:20,
+        },
+        navButtonText: {
+            fontSize: 20,
+            fontWeight: 'bold',
+            color: theme.colors.onPrimary || '#FFFFFF',
+        },
+        containBtnChangeDate: {
+            flexDirection: 'row',
+            marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+            justifyContent: 'space-between'
+        },
+        periodText: {
+            fontSize: 20,
+            fontWeight: '700',
+        },
+        errorText: {
+            fontSize: 16,
+            textAlign: 'center',
+            marginTop: 20,
+        },
+        noDataText: {
+            fontSize: 16,
+            textAlign: 'center',
+            marginTop: 20,
+        },
+        imgNodata: {
+            width: '100%',
+            height: 300
+        },
+    }), [theme]);
+
+    const RenderScheduleItem = memo(({ item }: { item: Period }) => {
+        const formatTime = (periodDate: string) => {
+            if (!periodDate) return 'N/A';
+            const startTime = moment(periodDate).format('HH:mm');
+            const endTime = moment(periodDate).add(45, 'minutes').format('HH:mm');
+            return `${startTime} - ${endTime}`;
+        };
+        return (
+            <TouchableOpacity>
+                <View style={styles.scheduleItem}>
+                    <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={[styles.periodText, { color: theme.colors.onSurface }]}>
+                            {item.periodno}
+                        </Text>
+                        <Text style={[styles.timeText, { color: theme.colors.primary }]}>
+                            {formatTime(item.perioddate)}
+                        </Text>
+                    </View>
+                    <View style={{ width: '60%' }}>
+                        <Text style={styles.subjectText}>{item.subjectName}</Text>
+                        <Text style={styles.subjectTextSecondary}>{item.teacherName}</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        )
+    });
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
@@ -211,7 +470,6 @@ const ParentScheduleScreen: FC = () => {
                     </View>
                     <View style={styles.weekNavigationContainer}>
 
-
                         <FlatList
                             data={weekDates}
                             renderItem={renderDayItem}
@@ -221,8 +479,8 @@ const ParentScheduleScreen: FC = () => {
                             contentContainerStyle={styles.weekContainer}
                             snapToInterval={width * 0.25}
                             ItemSeparatorComponent={() => <TouchableOpacity style={{ width: 10 }} />}
-                            ListHeaderComponent={<View style={{ width: 4 }} />}
-                            ListFooterComponent={<View style={{ width: 4 }} />}
+                            ListHeaderComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE}} />}
+                            ListFooterComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE }} />} 
                         />
 
 
@@ -260,263 +518,5 @@ const ParentScheduleScreen: FC = () => {
         </View>
     )
 }
-const RenderScheduleItem = memo(({ item }: { item: Period }) => {
-    const theme = useTheme();
-    const formatTime = (periodDate: string) => {
-        if (!periodDate) return 'N/A';
-        const startTime = moment(periodDate).format('HH:mm');
-        const endTime = moment(periodDate).add(45, 'minutes').format('HH:mm');
-        return `${startTime} - ${endTime}`;
-    };
-    return (
-        <TouchableOpacity>
-            <View style={styles.scheduleItem}>
-                <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={[styles.periodText, { color: theme.colors.onSurface }]}>
-                        {item.periodno}
-                    </Text>
-                    <Text style={[styles.timeText, { color: theme.colors.primary }]}>
-                        {formatTime(item.perioddate)}
-                    </Text>
-                </View>
-                <View style={{ width: '60%' }}>
-                    <Text style={styles.subjectText}>{item.subjectName}</Text>
-                    <Text style={styles.subjectTextSecondary}>{item.teacherName}</Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    )
-});
-
-
-const { width } = Dimensions.get('window');
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    header: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E8E8E8',
-    },
-    welcomeText: {
-        fontSize: 22,
-        fontWeight: '500',
-    },
-    mainContent: {
-        flex: 1,
-        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-        marginTop: 20,
-    },
-    infoContainer: {
-        marginBottom: 15,
-        display: 'none'
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 10,
-    },
-    infoItem: {
-        flex: 1,
-    },
-    infoLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 8,
-        color: '#333',
-    },
-    infoValueContainer: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#E8E8E8',
-        padding: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    infoValue: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#2C3E50',
-    },
-    pickerContainer: {
-        marginBottom: 20,
-    },
-    pickerLabel: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 8,
-        color: '#333',
-    },
-    pickerWrapper: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#E8E8E8',
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    picker: {
-        height: 'auto',
-        width: '100%',
-        color: '#2C3E50',
-    },
-    weekContainer: {
-        paddingVertical: 0,
-    },
-    dayContainer: {
-        alignItems: 'center',
-        paddingHorizontal: 5,
-        paddingVertical: 5,
-        borderRadius: 8,
-        width: width * 0.25,
-        backgroundColor: '#FFFFFF',
-        borderWidth: 1,
-        borderColor: '#E8E8E8',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    todayContainer: {
-        backgroundColor: '#3498DB',
-        borderColor: '#3498DB',
-    },
-    selectedContainer: {
-        backgroundColor: '#2ECC71',
-        borderColor: '#2ECC71',
-    },
-    dayText: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#2C3E50',
-    },
-    todayText: {
-        color: '#FFFFFF',
-    },
-    scheduleContainer: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 15,
-        marginTop: 20,
-        borderWidth: 1,
-        borderColor: '#E8E8E8',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    scheduleFlatList: {
-        flex: 1,
-    },
-    scheduleList: {
-        paddingBottom: 10,
-    },
-    scheduleItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E8E8E8',
-    },
-    timeText: {
-        fontSize: 14,
-        color: '#7F8C8D',
-    },
-    subjectText: {
-        fontSize: 17,
-        fontWeight: '500',
-        color: '#2C3E50',
-    },
-    subjectTextSecondary: {
-        fontSize: 14,
-        color: '#7F8C8D',
-    },
-    scheduleTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 15,
-        color: '#2C3E50',
-    },
-    weekNavigationContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 10,
-        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-    },
-    navButton: {
-        height: 50,
-        borderRadius: 20,
-        backgroundColor: '#3498DB',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    navButtonText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#FFFFFF',
-    },
-    containBtnChangeDate: {
-        flexDirection: 'row',
-        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-        justifyContent: 'space-between'
-    },
-    periodText: {
-        fontSize: 20,
-        fontWeight: '700',
-    },
-
-    errorText: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 20,
-    },
-    noDataText: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 20,
-    },
-    imgNodata: {
-        width: '100%',
-        height: 300
-    },
-});
 
 export default ParentScheduleScreen;
