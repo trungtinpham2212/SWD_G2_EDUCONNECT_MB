@@ -38,3 +38,6 @@ yarn-error.*
 
 
 .env
+
+# Firebase config files
+google-services.json

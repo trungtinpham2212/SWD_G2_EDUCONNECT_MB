@@ -21,20 +21,14 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.mobile"
+      "package": "com.anonymous.mobile",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font",
-      [
-        "expo-notifications",
-        {
-          "icon": "./src/assets/icon.png",
-          "color": "#ffffff"
-        }
-      ],
+      "expo-font", 
        "@react-native-firebase/app"
     ],
     "extra": {

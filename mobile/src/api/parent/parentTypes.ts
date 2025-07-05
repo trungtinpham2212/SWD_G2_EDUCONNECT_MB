@@ -1,3 +1,5 @@
+import { Teacher } from "@/api/teacher/teacherTypes";
+
 export type ScheduleStudentQueryRequest = {
     date: string;
     classId: number
@@ -28,6 +30,24 @@ export type PagedStudentReportResponse = {
     pageSize: number;
     totalPages: number;
 } 
+
+export type TeachersOfStudentRequest = {
+    classId : number;
+    start: string ;
+    end: string;
+    page: number;
+    pageSize: number;
+}
+
+export type TeachersOfStudentResponse = {
+    items : Teacher[];
+    totalCount: number;
+    pageNumber: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+
 
 type Parent = {
     userid: number;

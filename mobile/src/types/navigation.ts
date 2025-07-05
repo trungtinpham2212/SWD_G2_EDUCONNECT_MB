@@ -17,11 +17,12 @@ export type MainStackParamList = {
   TeacherSchedule: undefined;
   Chatbot: undefined;
   ParentReport: undefined;
+  TeacherReport: undefined;
   ChildTeachers: undefined;
   ClassStudent: undefined;
   Evaluation: undefined;
-  EditProfile : undefined;
   NotificationTest: undefined;
+  EditProfile : undefined;
 };
 
 export type BottomTabParamList = {

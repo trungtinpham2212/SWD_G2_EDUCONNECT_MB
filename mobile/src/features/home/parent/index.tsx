@@ -19,6 +19,29 @@ const ParentHomeScreen: React.FC = () => {
     const { authState } = useAuth();
     const theme = useTheme();
 
+    const navButtons = [
+        {
+            label: 'Chat With AI',
+            icon: <MaterialIcons name="chat-bubble-outline" size={36} color='#333' />,
+            screen: 'Chatbot',
+        },
+        {
+            label: 'Schedule',
+            icon: <MaterialCommunityIcons name="timetable" size={36} color='#333' />,
+            screen: 'ParentSchedule',
+        },
+        {
+            label: 'Report',
+            icon: <Octicons name="repo" size={36} color='#333' style={{paddingRight:6}} />,
+            screen: 'ParentReport',
+        },
+        {
+            label: 'Teachers',
+            icon: <MaterialCommunityIcons name="folder-information-outline" size={36} color='#333' />,
+            screen: 'ChildTeachers',
+        },
+    ];
+
     return (
         <MainLayout>
             <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
@@ -37,74 +60,24 @@ const ParentHomeScreen: React.FC = () => {
                 <ScrollView scrollEnabled={true} showsVerticalScrollIndicator={false}>
                     <View style={styles.mainContent}>
                         <View style={styles.row}>
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('Chatbot')}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <MaterialIcons name="chat-bubble-outline"   size={40} color="#333"/> 
-                                        <Text style={[styles.text]}>Chat With AI</Text>
-                                    </View>
-                                </Pressable>
-                            </View>
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('ParentSchedule')}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <MaterialCommunityIcons name="timetable" size={40} color="#333" />
-                                        <Text style={[styles.text]}>Schedule</Text>
-                                    </View>
-                                </Pressable>
-                            </View> 
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('ParentReport')}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <Octicons name="repo" size={40} style={{marginRight:6}} color="#333" />        
-                                        <Text style={[styles.text]}>Report</Text>
-                                    </View>
-                                </Pressable>
-                            </View>
-                            <View style={styles.containBtnNavigation}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('ChildTeachers')}
-                                    style={({ pressed }) => [
-                                        styles.button,
-                                        {
-                                            backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
-                                        },
-                                    ]}
-                                >
-                                    <View style={styles.containInsidePress}>
-                                        <MaterialCommunityIcons
-                                            name="folder-information-outline"
-                                            size={40}
-                                            color="#333"
-                                        />
-                                        <Text style={[styles.text]}>Teacher Information</Text>
-                                    </View>
-                                </Pressable>
-                            </View>
+                            {navButtons.map((button, index) => (
+                                <View key={index} style={styles.containBtnNavigation}>
+                                    <Pressable
+                                        onPress={() => navigation.navigate(button.screen as keyof MainStackParamList)}
+                                        style={({ pressed }) => [
+                                            styles.button,
+                                            {
+                                                backgroundColor: pressed ? theme.colors.secondary : COLORS.LIGHT_BLUE_MAIN,
+                                            },
+                                        ]}
+                                    >
+                                        <View style={styles.containInsidePress}>
+                                            {button.icon}
+                                            <Text style={[styles.text]}>{button.label}</Text>
+                                        </View>
+                                    </Pressable>
+                                </View>
+                            ))}
                         </View>
                     </View>
                 </ScrollView>

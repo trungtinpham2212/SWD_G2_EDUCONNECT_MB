@@ -6,6 +6,14 @@ export type ScheduleTeacherQueryRequest = {
     pageSize: number | 30;
 }
 
+export type Teacher = {
+    teacherId: number;
+    fullName: number;
+    subjectName: string;
+    phoneNumber: string;
+    email: string;
+}
+
 export type Period = {
     periodid : number | null,
     subjectid: number | null,

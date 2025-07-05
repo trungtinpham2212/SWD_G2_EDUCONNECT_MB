@@ -8,8 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { parentService, Student, PagedStudentReportResponse, Report, StudentReportQueryRequest } from '@/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import SplashScreen from '@/features/splash/SplashScreen'; 
-import { useSplashDelay } from '@/features/splash/hooks/useSplashDelay';
+import SplashScreen from '@/features/splash/SplashScreen';  
 import moment from 'moment';
 // import DateRangeSelector from '@/features/report/parent/components/DateRangeSelector';
  
@@ -20,6 +19,7 @@ const ParentReportScreen: React.FC = () => {
     const [students, setStudents] = useState<Student[]>([]);
     const [selectedName, setSelectedName] = useState<string>('');
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null); 
+    const [loadingStudents, setLoadingStudents] = useState(false);
 
     const [listReport, setListReport] = useState<Report[]>([]);
     const [page, setPage] = useState<number>(1);
@@ -28,6 +28,7 @@ const ParentReportScreen: React.FC = () => {
     const [hasMore, setHasMore] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [initialReportLoading, setInitialReportLoading] = useState(true);
 
     const { authState } = useAuth();
     const parentId = authState.user?.userId; 
@@ -102,6 +103,17 @@ const ParentReportScreen: React.FC = () => {
             color: theme.colors.onSurfaceVariant || '#888',
             fontSize: 13,
         },
+        pickerLoadingContainer: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            zIndex: 1,
+        },
     }), [theme]);
 
     const fetchReportStudent = async (studentId: number, nextPage = 1, append = false) => {
@@ -125,7 +137,10 @@ const ParentReportScreen: React.FC = () => {
         } catch (err) {
             // handle error
         } finally {
-            if (!append && nextPage === 1) setLoading(false);
+            if (!append && nextPage === 1) {
+                setLoading(false);
+                setInitialReportLoading(false);
+            }
         }
     };
 
@@ -133,6 +148,7 @@ const ParentReportScreen: React.FC = () => {
         const fetchStudents = async () => {
             if (!parentId) return;
             try {
+                setLoadingStudents(true);
                 const data = await parentService.getStudentsByParentId(parentId);
                 setStudents(data);
                 if (data.length > 0) {
@@ -146,13 +162,14 @@ const ParentReportScreen: React.FC = () => {
                 }
             } catch (error) {
                 console.error('Error fetching students:', error);
+            } finally {
+                setLoadingStudents(false);
             }
         };
         fetchStudents();
     }, [parentId]);
 
-    const handleStudentChange = async (studentId: number) => {
-        console.log("studentid: "+ studentId)
+    const handleStudentChange = async (studentId: number) => { 
         const selectedStudent = students.find(s => Number(s.studentid) === studentId);
         if (selectedStudent) {
             setSelectedStudentId(studentId);
@@ -179,11 +196,6 @@ const ParentReportScreen: React.FC = () => {
         }
     };
 
-    const firstRun = useSplashDelay(2500);   
-    if (firstRun) {
-        return <SplashScreen loading={true} />;
-    }
-
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>   
             <View style={styles.mainContent}>
@@ -200,24 +212,36 @@ const ParentReportScreen: React.FC = () => {
                         }}
                         dropdownIconColor={theme.colors.primary}
                         itemStyle={{ color: theme.colors.onSurface }}
+                        enabled={!loadingStudents}
                     >
-                        {students.map((student) => (
-                            <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
-                        ))}
+                        {loadingStudents ? (
+                            <Picker.Item label="Loading students..." value="" />
+                        ) : students.length === 0 ? (
+                            <Picker.Item label="No students available" value="" />
+                        ) : (
+                            students.map((student) => (
+                                <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
+                            ))
+                        )}
                     </Picker>
+                    {loadingStudents && (
+                        <View style={styles.pickerLoadingContainer}>
+                            <ActivityIndicator size="small" color={theme.colors.primary} />
+                        </View>
+                    )}
                 </View>
                 {/* Loading indicator when fetching reports */}
-                {loading && (
+                {initialReportLoading ? (
                     <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginVertical: 24 }} />
-                )}
-                {/* No data message */}
-                {!loading && listReport.length === 0 && (
+                ) : loading ? (
+                    <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginVertical: 24 }} />
+                ) : listReport.length === 0 ? (
                     <View style={{ alignItems: 'center', marginTop: 32 }}>
                         <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 16 }}>Không có báo cáo nào</Text>
                     </View>
-                )}
+                ) : null}
                 {/* Danh sách báo cáo */}
-                {!loading && listReport.length > 0 && (
+                {!initialReportLoading && !loading && listReport.length > 0 && (
                     <FlatList
                         data={listReport}
                         keyExtractor={item => item.reportstudentid.toString()}

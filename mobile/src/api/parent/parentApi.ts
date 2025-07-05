@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axiosConfig";
-import {Student, ScheduleStudentQueryRequest, StudentReportQueryRequest, PagedStudentReportResponse} from '@/api/parent/parentTypes';
+import {Student, ScheduleStudentQueryRequest, StudentReportQueryRequest, PagedStudentReportResponse, TeachersOfStudentRequest, TeachersOfStudentResponse} from '@/api/parent/parentTypes';
 import { PeriodResponse } from "@/api/teacher/teacherTypes";
 
 export const parentApi = {
@@ -20,6 +20,15 @@ export const parentApi = {
         const response = await axiosInstance.get<PagedStudentReportResponse>(`/api/report-students/student/${studentId}`,{
             params: {
                 page , pageSize
+            }
+        });
+        return response.data;
+    },
+    getTeachersOfStudent : async(payload: TeachersOfStudentRequest) : Promise<TeachersOfStudentResponse> =>{
+        const {classId, start, end, page, pageSize} = payload;
+        const response = await axiosInstance.get<TeachersOfStudentResponse>(`/api/teachers/by-class/${classId}`,{
+            params:{
+                start, end, page, pageSize
             }
         });
         return response.data;

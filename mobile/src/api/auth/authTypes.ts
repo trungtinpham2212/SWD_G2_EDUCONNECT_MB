@@ -33,3 +33,21 @@ export type UserData ={
   address?: string;
   avatarURL: string | null;
 }
+
+export type TeacherInfor = {
+  teacherid : number;
+  userid: number;
+  subjectid: number;
+  user: UserInfor;
+}
+
+type UserInfor = {
+  userid:number;
+  fullname: string;
+  email: string;
+  phonenumber: string;
+  address: string;
+  status: true;
+  roleid: number;
+  avatarurl: string | null;
+}

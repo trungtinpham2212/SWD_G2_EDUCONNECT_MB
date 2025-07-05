@@ -25,6 +25,8 @@ const ParentScheduleScreen: FC = () => {
 
     const [schedule, setSchedule] = useState<Period[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loadingStudents, setLoadingStudents] = useState(false);
+    const [initialScheduleLoading, setInitialScheduleLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const { authState } = useAuth();
@@ -106,6 +108,7 @@ const ParentScheduleScreen: FC = () => {
             setSchedule([]);
         } finally {
             setLoading(false);
+            setInitialScheduleLoading(false);
         }
     };
 
@@ -113,6 +116,7 @@ const ParentScheduleScreen: FC = () => {
         const fetchStudents = async () => {
             if (!parentId) return;
             try {
+                setLoadingStudents(true);
                 const data = await parentService.getStudentsByParentId(parentId);
                 setStudents(data);
                 if (data.length > 0) {
@@ -125,6 +129,8 @@ const ParentScheduleScreen: FC = () => {
                 }
             } catch (error) {
                 console.error('Error fetching students:', error);
+            } finally {
+                setLoadingStudents(false);
             }
         };
 
@@ -236,6 +242,17 @@ const ParentScheduleScreen: FC = () => {
             height: 'auto',
             width: '100%',
             color: theme.colors.onSurface || '#2C3E50',
+        },
+        pickerLoadingContainer: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            zIndex: 1,
         },
         weekContainer: {
             paddingVertical: 0,
@@ -425,14 +442,25 @@ const ParentScheduleScreen: FC = () => {
                         <Picker
                             selectedValue={selectedName}
                             onValueChange={(value) => handleStudentChange(Number(value))}
-
                             style={styles.picker}
                             dropdownIconColor="#666"
+                            enabled={!loadingStudents}
                         >
-                            {students.map((student) => (
-                                <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
-                            ))}
+                            {loadingStudents ? (
+                                <Picker.Item label="Loading students..." value="" />
+                            ) : students.length === 0 ? (
+                                <Picker.Item label="No students available" value="" />
+                            ) : (
+                                students.map((student) => (
+                                    <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
+                                ))
+                            )}
                         </Picker>
+                        {loadingStudents && (
+                            <View style={styles.pickerLoadingContainer}>
+                                <ActivityIndicator size="small" color={theme.colors.primary} />
+                            </View>
+                        )}
                     </View>
                 </View>
 
@@ -492,7 +520,9 @@ const ParentScheduleScreen: FC = () => {
                     <Text style={[styles.scheduleTitle, { color: theme.colors.onSurface }]}>
                         Schedule for {selectedDate.format('dddd, MMMM D')}
                     </Text>
-                    {loading ? (
+                    {initialScheduleLoading ? (
+                        <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
+                    ) : loading ? (
                         <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
                     ) : error ? (
                         <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>

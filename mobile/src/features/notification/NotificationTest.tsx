@@ -1,7 +1,7 @@
 import { Text, View,Linking, ActivityIndicator  } from "react-native"; 
 import { use, useEffect, useState } from "react";
-import {PermissionsAndroid} from 'react-native'; 
 import messaging from '@react-native-firebase/messaging'; 
+import {PermissionsAndroid} from 'react-native'; 
 
 
 const NotificationTest: React.FC = () => {
