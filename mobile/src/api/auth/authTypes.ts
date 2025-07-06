@@ -4,7 +4,7 @@ export type FormLoginRequest = {
   password: string;
 }
 
-type LoginSuccess = { 
+type LoginSuccess = {
   token: string;
   userName: string;
   email: string;
@@ -17,12 +17,12 @@ type LoginSuccess = {
   avatarURL: string | null;
 };
 
-type LoginFail = { 
+type LoginFail = {
   message: string;
 };
 export type LoginResponse = LoginSuccess | LoginFail;
 
-export type UserData ={
+export type UserData = {
   email?: string;
   userName?: string;
   roleId?: number;
@@ -34,20 +34,36 @@ export type UserData ={
   avatarURL: string | null;
 }
 
-export type TeacherInfor = {
-  teacherid : number;
-  userid: number;
-  subjectid: number;
-  user: UserInfor;
+type TeacherInfor = {
+  teacherId: number;
+  teacherName: string;
+  subject: {
+    subjectId: number;
+    subjectName: string;
+  } | null;
 }
 
+
+type Student = {
+  studentId: number;
+  name: number;
+  dateOfBirth: string;
+  class: {
+    classId: number;
+    className: string;
+  } | null;
+}
+
+
 type UserInfor = {
-  userid:number;
+  userid: number;
   fullname: string;
   email: string;
   phonenumber: string;
   address: string;
   status: true;
-  roleid: number;
+  roleId: number;
   avatarurl: string | null;
+  teacher: TeacherInfor | null;
+
 }
