@@ -18,5 +18,9 @@ export const teacherApi = {
     getActivities: async() : Promise<Activity[]> => {
         const response = await axiosInstance.get<Activity[]>('/api/activities');
         return response.data;
+    },
+    getStudentsByClassId: async(classId: number) : Promise<Student[]> => {
+        const response = await axiosInstance.get<Student[]>(`/api/students/by-class/${classId}`);
+        return response.data;
     }
 }

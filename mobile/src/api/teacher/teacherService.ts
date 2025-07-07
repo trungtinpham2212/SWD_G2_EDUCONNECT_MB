@@ -1,4 +1,4 @@
-import { ScheduleTeacherQueryRequest, Period, PeriodResponse } from "@/api/teacher/teacherTypes";
+import { ScheduleTeacherQueryRequest, Period, PeriodResponse, Activity } from "@/api/teacher/teacherTypes";
 import {teacherApi} from '@/api/teacher/teacherApi';
 import { Student } from "@/api/parent/parentTypes";
 
@@ -12,11 +12,27 @@ export const teacherService = {
             return null;
         }
     },
-    getStudentsHomeRoom: async(teacherId: number) : Promise<Student[]> => {
+    getStudentsByTeacherId: async(teacherId: number) : Promise<Student[]> => {
         try{
             return await teacherApi.getStudentsHomeRoom(teacherId);
         }catch(err){
             console.error("List Student get failed:", err);
+            return [];
+        }
+    },
+    getActivities: async() : Promise<Activity[]> => {
+        try{
+            return await teacherApi.getActivities();
+        }catch(err){
+            console.error("List Student get failed:", err);
+            return [];
+        }
+    },
+    getStudentsByClassId: async(classId: number) : Promise<Student[]> => {
+        try{
+            return await teacherApi.getStudentsByClassId(classId);
+        }catch(err){
+            console.error("List students get failed: ", err);
             return [];
         }
     }

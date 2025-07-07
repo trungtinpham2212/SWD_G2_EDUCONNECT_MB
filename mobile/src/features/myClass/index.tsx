@@ -40,9 +40,8 @@ const ClassStudentScreen: React.FC = () => {
 
             setLoading(true);
             setError(null);
-            try {
-                console.log(teacherId);
-                const data = await teacherService.getStudentsHomeRoom(teacherId);
+            try { 
+                const data = await teacherService.getStudentsByTeacherId(teacherId);
                 if (Array.isArray(data) && data.length > 0) {
                     const firstStudent = data[0];
                     const className = firstStudent?.class?.classname ?? 'Unknown Class';
@@ -63,6 +62,11 @@ const ClassStudentScreen: React.FC = () => {
         };
         fetchStudents();
     }, [teacherId]);
+
+    function normalize(str: string) {
+        return str.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+    }
+    const filteredStudents = students.filter(student => normalize(student.name).includes(normalize(debouncedName)));
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -105,9 +109,8 @@ const ClassStudentScreen: React.FC = () => {
                                 </Text>
                             </View>
                         ) : (
-
                             <FlatList
-                                data={students}
+                                data={filteredStudents}
                                 renderItem={({ item }) => <RenderItemStudent item={item} />}
                                 keyExtractor={(item) => item.studentid.toString()}
                                 contentContainerStyle={styles.scheduleList}

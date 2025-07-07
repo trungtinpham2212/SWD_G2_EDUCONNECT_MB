@@ -20,7 +20,13 @@ export type MainStackParamList = {
   TeacherReport: undefined;
   ChildTeachers: undefined;
   ClassStudent: undefined;
-  Evaluation: undefined;
+  Evaluation: {
+    classId: number,
+    periodNo: number,
+    nameClass: string,
+    date: string,
+    nameSubject: string,
+  };
   NotificationTest: undefined;
   EditProfile : undefined;
 };

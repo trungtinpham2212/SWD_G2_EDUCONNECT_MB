@@ -7,7 +7,7 @@ import { SIZES } from '@/constants';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainStackParamList } from '@/types/navigation';
-import { Period, ScheduleTeacherQueryRequest, teacherService, PeriodResponse } from '@/api';
+import { Period, ScheduleTeacherQueryRequest, teacherService} from '@/api';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
@@ -29,9 +29,7 @@ const TeacherScheduleScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { authState } = useAuth(); 
-  const teacherId = authState.user?.teacherId!; 
-
- 
+  const teacherId = authState.user?.teacherId!;  
 
   const weekDates = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -92,8 +90,7 @@ const TeacherScheduleScreen: React.FC = () => {
   const goToNextWeek = () => {
     const newWeek = moment(currentWeek).add(1, 'week');
     setCurrentWeek(newWeek);
-    // Reset selected date to first day of new week
-    console.log(newWeek)
+    // Reset selected date to first day of new week 
     setSelectedDate(newWeek);
   };
 
@@ -352,7 +349,12 @@ const TeacherScheduleScreen: React.FC = () => {
       return `${startTime} - ${endTime}`;
     };
     return (
-      <TouchableOpacity onPress={() => navigation.navigate('Evaluation')}>
+      <TouchableOpacity onPress={() => navigation.navigate('Evaluation', {
+                                                            classId:item.classid, 
+                                                            periodNo: item.periodno, 
+                                                            nameClass: item.className,
+                                                            date: selectedDate.format('YYYY-MM-DD'),
+                                                            nameSubject: item.subjectName})}>
         <View style={styles.scheduleItem}>
           <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
             <Text style={[styles.periodText, { color: theme.colors.onSurface }]}>

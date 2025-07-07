@@ -17,12 +17,12 @@ export type Teacher = {
 export type Period = {
     periodid : number | null,
     subjectid: number | null,
-    periodno: number | null,
-    classid: number | null,
+    periodno: number,
+    classid: number ,
     teacherid: number| null,
     perioddate: string,
-    className: string | null,
-    subjectName: string | null,
+    className: string ,
+    subjectName: string,
     teacherName: string | null
 } 
 

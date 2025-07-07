@@ -1,42 +1,48 @@
 import { View, Text, TextInput, StyleSheet, Dimensions, ScrollView } from 'react-native';
-import { Button, Checkbox, useTheme } from 'react-native-paper';
+import { Button, Checkbox, useTheme, ActivityIndicator, Modal, Portal } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SIZES } from '@/constants';
+import { NavigationProp, useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import {MainStackParamList} from '@/types/navigation'; 
+import { Student, teacherService, Activity } from '@/api'; 
 
+type EvaluationRouteProp = RouteProp<MainStackParamList, 'Evaluation'>;
 const windowHeight = Dimensions.get('window').height;
-
-type Student = {
-    studentid: number;
-    name: string;
-    dateofbirth: string;
-    parentid: number;
-    classid: number;
-    activity?: string;
-    groupNote?: string;
-}
-
-export type Activity = {
-    activityid: number;
-    isnegative: boolean;
-    activitytype: boolean;
-}
-
+ 
+ 
 const EvaluationScreen: React.FC = () => {
+    const route = useRoute<EvaluationRouteProp>();
+    const {classId, periodNo, nameClass, date, nameSubject} = route.params; 
     const theme = useTheme();
     const [searchText, setSearchText] = useState('');
     const [selectedActivity, setSelectedActivity] = useState('');
-    const [students, setStudents] = useState<Student[]>([
-        { studentid: 1, name: 'John Kennedy', dateofbirth: '2000-01-01', parentid: 1, classid: 1, activity: '', groupNote: '' },
-        { studentid: 2, name: 'Jane Smith', dateofbirth: '2001-02-02', parentid: 2, classid: 1, activity: '', groupNote: '' },
-        { studentid: 3, name: 'Alice Brown', dateofbirth: '2002-03-03', parentid: 3, classid: 1, activity: '', groupNote: '' },
-        { studentid: 4, name: 'Bob White', dateofbirth: '2003-04-04', parentid: 4, classid: 1, activity: '', groupNote: '' },
-    ]);
+    const [students, setStudents] = useState<Student[]>([]);
     const [checkedStudents, setCheckedStudents] = useState<{ [key: number]: boolean }>({});
     const [selectAll, setSelectAll] = useState(false);
-    const [activityAll, setActivityAll] = useState<string>("");
-
-    const activities = ['Activity 1', 'Activity 2', 'Activity 3'];
+    const [activities, setActivities] = useState<Activity[]>([]);
+    const styles = createStyles(theme);
+    const [loading, setLoading] = useState(true);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [numberOfStudents, setNumberOfStudents] = useState<number>(0); 
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const studentsRes = await teacherService.getStudentsByClassId(classId);
+                if (studentsRes){
+                    setStudents(studentsRes);
+                    setNumberOfStudents(studentsRes.length);
+                } 
+            } catch (err) {}
+            try {
+                const activitiesRes = await teacherService.getActivities();
+                if (activitiesRes) setActivities(activitiesRes);
+            } catch (err) {}
+            setLoading(false);
+        };
+        fetchData();
+    }, [classId]);
 
     const handleSelectAll = () => {
         if (selectAll) {
@@ -67,17 +73,42 @@ const EvaluationScreen: React.FC = () => {
         });
     };
 
+    function normalize(str: string) {
+        return str.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+    }
+    const filteredStudents = students.filter((student) => normalize(student.name).includes(normalize(searchText)));
+
     return (
         <View style={styles.container}>
+            <Portal>
+                <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>Thông tin buổi học</Text>
+                    <Text style={styles.modalText}>Tên lớp: {nameClass}</Text>
+                    <Text style={styles.modalText}>Tiết: {periodNo}</Text>
+                    <Text style={styles.modalText}>Sĩ số: {numberOfStudents}</Text>
+                    <Text style={styles.modalText}>Ngày: {date}</Text>
+                    <Text style={styles.modalText}>Môn học: {nameSubject}</Text>
+                    <Button mode="contained" onPress={() => setModalVisible(false)} style={{marginTop: 16}}>
+                        Đóng
+                    </Button>
+                </Modal>
+            </Portal>
+            {loading ? (
+                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                    <ActivityIndicator animating={true} size="large" color={theme.colors.primary} />
+                </View>
+            ) : (
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
-                    <Text style={styles.headerText}>Class: 9A1</Text>
-                    <Text style={styles.headerText}>Section: 1</Text>
+                    <Button mode="outlined" onPress={() => setModalVisible(true)} style={styles.infoButton}>
+                        Thông tin buổi học
+                    </Button>
                 </View>
                 <View style={styles.searchContainer}>
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search by name..."
+                        placeholderTextColor={theme.colors.onSurface}
                         value={searchText}
                         onChangeText={setSearchText}
                     />
@@ -87,162 +118,181 @@ const EvaluationScreen: React.FC = () => {
                     <TextInput
                         style={styles.evaluateArea}
                         placeholder="Enter evaluation..."
+                        placeholderTextColor={theme.colors.onSurface}
                         multiline
                         numberOfLines={4}
                     />
                 </View>
                 <View style={styles.buttonContainer}>
-                    <Button mode="contained" onPress={handleSelectAll} style={styles.button}>
+                    <Button mode="contained" onPress={handleSelectAll} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
                         Select all
                     </Button>
-                    <Button mode="contained" onPress={() => { }} style={styles.button}>
+                    <Button mode="contained" onPress={() => { }} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
                         Add
                     </Button>
                 </View> 
                 <View style={styles.activityAllContainer}>
-                    <Text style={styles.activityAllLabel}>Activity all:</Text>
-                    <View style={[styles.pickerContainer, { flex: 1 }]}>
+                    <Text style={styles.activityAllLabel}>Activity:</Text>
+                    <View style={[styles.pickerContainer, { flex: 1 }]}> 
                         <Picker
-                            selectedValue={activityAll}
-                            onValueChange={(value) => {
-                                setActivityAll(value as string);
-                                setStudents((prev) => prev.map(s => ({ ...s, activity: value as string })));
-                            }}
+                            selectedValue={selectedActivity}
+                            onValueChange={(value) => setSelectedActivity(value as string)}
                             style={styles.picker}
                         >
                             <Picker.Item label="Activity" value="" />
                             {activities.map((activity, idx) => (
-                                <Picker.Item key={idx} label={activity} value={activity} />
+                                <Picker.Item 
+                                    key={activity.activityid} 
+                                    label={activity.activitytype ? activity.activitytype.toString() : activity.activityid.toString()} 
+                                    value={activity.activityid.toString()} 
+                                />
                             ))}
                         </Picker>
                     </View>
                 </View>
                 <View style={styles.studentList}>
-                    {students.map((student, index) => (
+                    <Text style={styles.activityAllLabel}>List Students:</Text>
+                    {filteredStudents.map((student) => (
                         <View key={student.studentid} style={styles.studentItem}>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <View style={styles.studentCheckbox}>
                                     <Checkbox
                                         status={checkedStudents[student.studentid] ? 'checked' : 'unchecked'}
                                         onPress={() => handleCheckboxToggle(student.studentid)}
+                                        color={theme.colors.primary}
                                     />
                                 </View>
                                 <Text style={styles.studentName}>{student.name}</Text>
                             </View>
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={student.activity}
-                                    onValueChange={(value) => {
-                                        const updatedStudents = [...students];
-                                        updatedStudents[index].activity = value as string;
-                                        setStudents(updatedStudents);
-                                    }}
-                                    style={styles.picker}
-                                >
-                                    <Picker.Item label="Activity" value="" />
-                                    {activities.map((activity, idx) => (
-                                        <Picker.Item key={idx} label={activity} value={activity} />
-                                    ))}
-                                </Picker>
-                            </View>
-
                         </View>
                     ))}
                 </View>
             </ScrollView>
+            )}
         </View>
     )
 };
 
-export default EvaluationScreen;
+function createStyles(theme: any) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
+            backgroundColor: theme.colors.background,
+            paddingTop:10,
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+        },
+        headerText: {
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: theme.colors.onBackground,
+        },
+        searchContainer: {
+            marginBottom: 10,
+        },
+        searchInput: {
+            borderWidth: 1,
+            borderColor: theme.colors.onSurface,
+            borderRadius: 5,
+            fontSize: 16,
+            color: theme.colors.onSurface,
+            backgroundColor: theme.colors.surface,
+        },
+        evaluateContainer: {
+            marginBottom: 10,
+        },
+        evaluateLabel: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: theme.colors.onBackground,
+        },
+        buttonContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+        },
+        button: {
+            flex: 1,
+            marginHorizontal: 5,
+        },
+        studentList: {
+            // flex: 1,
+        },
+        studentItem: {
+            paddingVertical: 10,
+            paddingHorizontal: 5,
+            borderWidth: 1,
+            borderColor: theme.colors.onSurface,
+            borderRadius: 5,
+            marginBottom: 10,
+            backgroundColor: theme.colors.surface,
+        },
+        studentName: {
+            fontSize: 16,
+            color: theme.colors.onSurface,
+        },
+        pickerContainer: {
+            borderWidth: 1,
+            borderColor: theme.colors.onSurface,
+            borderRadius: 5,
+            backgroundColor: theme.colors.surface,
+        },
+        picker: {
+            width: '100%',
+            color: theme.colors.onSurface,
+        },
+        activityAllContainer: { 
+            marginBottom: 10,
+        },
+        activityAllLabel: {
+            fontSize: 16,
+            fontWeight: 'bold',
+            marginRight: 10,
+            color: theme.colors.onBackground,
+            marginBottom: 8
+        },
+        studentCheckbox: {
+            marginLeft: 10,
+        },
+        evaluateArea: {
+            borderWidth: 1,
+            borderColor: theme.colors.onSurface,
+            borderRadius: 5,
+            paddingVertical: 5,
+            paddingHorizontal:10,
+            fontSize: 16,
+            backgroundColor: theme.colors.surface,
+            color: theme.colors.onSurface,
+            minHeight: 80,
+            marginTop: 5,
+            marginBottom: 10,
+        },
+        infoButton: {
+            marginBottom: 10,
+        },
+        modalContainer: {
+            backgroundColor: theme.colors.surface,
+            padding: 24,
+            margin: 24,
+            borderRadius: 12,
+            alignItems: 'center',
+        },
+        modalTitle: {
+            fontSize: 20,
+            fontWeight: 'bold',
+            marginBottom: 12,
+            color: theme.colors.primary,
+        },
+        modalText: {
+            fontSize: 16,
+            marginBottom: 8,
+            color: theme.colors.onSurface,
+        },
+    });
+}
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        marginHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
-        backgroundColor: '#f5f5f5',
-        marginTop:10,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    headerText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    searchContainer: {
-        marginBottom: 10,
-    },
-    searchInput: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        fontSize: 16,
-    },
-    evaluateContainer: {
-        marginBottom: 10,
-    },
-    evaluateLabel: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    button: {
-        flex: 1,
-        marginHorizontal: 5,
-    },
-    studentList: {
-        // flex: 1,
-    },
-    studentItem: {
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        marginBottom: 10,
-        backgroundColor: '#fff',
-    },
-    studentName: {
-        fontSize: 16,
-    },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-    },
-    picker: {
-        width: '100%',
-    },
-    activityAllContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    activityAllLabel: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginRight: 10,
-    },
-    studentCheckbox: {
-        marginLeft: 10,
-    },
-    evaluateArea: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        paddingVertical: 5,
-        paddingHorizontal:10,
-        fontSize: 16,
-        backgroundColor: '#fff',
-        minHeight: 80,
-        marginTop: 5,
-        marginBottom: 10,
-    },
-});
+export default EvaluationScreen;
