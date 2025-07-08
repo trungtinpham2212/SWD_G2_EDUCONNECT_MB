@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "EduConnect",
+    "slug": "edu-connect",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,14 +32,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font", 
-       "@react-native-firebase/app"
+      "expo-font",
+      "@react-native-firebase/app"
     ],
+    "owner": "educonnect_swd",
     "extra": {
       "eas": {
-        "projectId": "89084cd3-b115-46a0-a44e-8e8a73bb2cde"
+        "projectId": "7277de9d-b710-451f-819d-28c8b153761e"
       }
-    },
-    "owner": "acnbokhb12"
+    }
   }
 }
