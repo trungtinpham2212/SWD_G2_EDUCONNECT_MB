@@ -55,7 +55,7 @@ type Student = {
 }
 
 
-type UserInfor = {
+export type UserInfor = {
   userid: number;
   fullname: string;
   email: string;
@@ -65,5 +65,5 @@ type UserInfor = {
   roleId: number;
   avatarurl: string | null;
   teacher: TeacherInfor | null;
-
+  students: Student[] | null;
 }

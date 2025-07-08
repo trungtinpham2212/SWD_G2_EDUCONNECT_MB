@@ -1,5 +1,4 @@
-import { COLORS, SIZES } from "@/constants";
-import { useNavigation } from "@react-navigation/native";
+import { COLORS, SIZES } from "@/constants"; 
 import { useState, useEffect, memo } from "react";
 import { ActivityIndicator, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import { View } from "react-native";
@@ -12,7 +11,7 @@ const windowHeight = Dimensions.get('window').height;
 
 const ClassStudentScreen: React.FC = () => {
     const theme = useTheme();
-    const navigation = useNavigation();
+    // const navigation = useNavigation();
     const [name, setName] = useState('');
     const [debouncedName, setDebouncedName] = useState(name);
 

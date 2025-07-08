@@ -12,8 +12,9 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { MainStackParamList } from "@/types/navigation";
 
 // type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+const DEFAULT_AVATAR = 'https://i.pinimg.com/564x/32/25/b1/3225b1ec8c0064fba95d2d84faa79626.jpg';
 
-const SettingScreen= () => {
+const SettingScreen:FC = () => {
     const theme = useTheme();
     const navigation: NavigationProp<MainStackParamList> = useNavigation();
 
@@ -35,7 +36,7 @@ const SettingScreen= () => {
         handleLogout();
         hideDialog();
     };
-
+    const img = authState.user?.avatarURL || DEFAULT_AVATAR;
     return (
         <MainLayout>
             <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
@@ -47,7 +48,7 @@ const SettingScreen= () => {
                 {/* Main Content */}
                 <View style={styles.mainContent}>
                     <View style={styles.profileContainer}>
-                        <Image style={styles.profileAvatar} source={{ uri: 'https://i.pinimg.com/564x/32/25/b1/3225b1ec8c0064fba95d2d84faa79626.jpg' }} />
+                        <Image style={styles.profileAvatar} source={{ uri: img }} />
                         <View>
                             <Text style={[styles.profileName, { color: theme.colors.onSurface }]}>
                                 {authState.user?.userName || 'User'}

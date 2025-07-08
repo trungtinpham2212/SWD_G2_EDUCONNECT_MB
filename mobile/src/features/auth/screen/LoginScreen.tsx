@@ -11,7 +11,7 @@ import { COLORS } from '@/constants/colors';
 // import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 // import { RootStackParamList } from '@/types/navigation';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { FormLoginRequest, loginService } from '@/api'; 
+import { FormLoginRequest, authService } from '@/api'; 
 
 // type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 
 
@@ -31,8 +31,13 @@ const LoginScreen = () => {
   const onSubmit = async (data: FormLoginRequest) => {  
     try { 
       setIsLoading(true);
-      const res = await loginService(data);  
+      const res = await authService.login(data);  
       if ('token' in res) {   
+        if(res.roleId === 1){
+          setErrorResponse('Tài khoản này không có quyền truy cập ứng dụng.');
+          setIsLoading(false);
+          return;
+        }
         await login(res.token, {
           email: res.email,
           userName: res.userName,

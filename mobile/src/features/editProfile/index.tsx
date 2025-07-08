@@ -1,87 +1,46 @@
 import MainLayout from '@/layouts/MainLayout';
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    Image,
-    Alert,
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, TouchableWithoutFeedback} from 'react-native';
 import { TextInput } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse, MediaType, ImageLibraryOptions } from 'react-native-image-picker';
-
-// Types
-interface UserProfile {
-    id: string;
-    avatar: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    bio: string;
-    dateOfBirth: string;
-}
+import { UserInfor, authService } from '@/api';
+import { useAuth } from '@/features/auth/context/AuthContext';
+import { useTheme } from 'react-native-paper';
 
 interface EditProfileProps {
     navigation: any;
     route?: {
         params?: {
-            userProfile?: UserProfile;
+            userProfile?: UserInfor;
         };
     };
 }
 
+const DEFAULT_AVATAR = 'https://i.pinimg.com/564x/32/25/b1/3225b1ec8c0064fba95d2d84faa79626.jpg';
+
 const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) => {
     const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [profile, setProfile] = useState<UserProfile>({
-        id: '',
-        avatar: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        bio: '',
-        dateOfBirth: '',
-    });
-
-    // Initialize profile data
+    const [saving, setSaving] = useState(false); 
+    const { authState } = useAuth();
+    const userId = authState.user?.userId!;
+    const [userInfor, setUserInfor] = useState<UserInfor | null>(null);
+    const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+    const theme = useTheme(); 
     useEffect(() => {
-        // Load existing profile data from props, API, or AsyncStorage
-        const existingProfile = route?.params?.userProfile;
-        if (existingProfile) {
-            setProfile(existingProfile);
-        } else {
-            // Load from API or storage
-            loadUserProfile();
-        }
-    }, []);
+        setLoading(true);
+        authService.getUserById(userId).then((res) => {
+            setUserInfor(res);
+            setLoading(false);
+        }).catch(() => setLoading(false));
+    }, [userId]);
+
+
 
     const loadUserProfile = async () => {
         try {
             setLoading(true);
-            // Simulate API call
-            // const response = await getUserProfile();
-            // setProfile(response.data);
-
-            // Mock data for demo
+            // Simulate API call 
             setTimeout(() => {
-                setProfile({
-                    id: '1',
-                    avatar: 'https://via.placeholder.com/150',
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    email: 'john.doe@example.com',
-                    phone: '+84 123 456 789',
-                    bio: 'Software Developer',
-                    dateOfBirth: '1990-01-01',
-                });
                 setLoading(false);
             }, 1000);
         } catch (error) {
@@ -108,41 +67,18 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
             if (response.assets && response.assets[0]) {
                 const imageUri = response.assets[0].uri;
                 if (imageUri) {
-                    setProfile(prev => ({ ...prev, avatar: imageUri }));
+                    setSelectedAvatar(imageUri);
                 }
             }
         });
     };
 
-    const handleInputChange = (field: keyof UserProfile, value: string) => {
-        setProfile(prev => ({ ...prev, [field]: value }));
-    };
+    // handleInputChange is removed
 
-    const validateForm = (): boolean => {
-        if (!profile.firstName.trim()) {
-            Alert.alert('Validation Error', 'First name is required');
-            return false;
-        }
-        if (!profile.lastName.trim()) {
-            Alert.alert('Validation Error', 'Last name is required');
-            return false;
-        }
-        if (!profile.email.trim()) {
-            Alert.alert('Validation Error', 'Email is required');
-            return false;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(profile.email)) {
-            Alert.alert('Validation Error', 'Please enter a valid email address');
-            return false;
-        }
-
-        return true;
-    };
+    // validateForm is removed
 
     const handleSave = async () => {
-        if (!validateForm()) return;
+        // if (!validateForm()) return; // This line is removed
 
         try {
             setSaving(true);
@@ -184,7 +120,7 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
     if (loading) {
         return (
             <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#007AFF" />
+                <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Text style={styles.loadingText}>Loading profile...</Text>
             </SafeAreaView>
         );
@@ -192,120 +128,107 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
 
     return (
         <MainLayout>
-
-
-
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.container}
+                style={{ flex: 1, backgroundColor: theme.colors.background }}
             >
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-                        <Text style={styles.cancelText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Edit Profile</Text>
-                    <TouchableOpacity
-                        onPress={handleSave}
-                        style={[styles.headerButton, saving && styles.disabledButton]}
-                        disabled={saving}
-                    >
-                        {saving ? (
-                            <ActivityIndicator size="small" color="#007AFF" />
-                        ) : (
-                            <Text style={styles.saveText}>Save</Text>
-                        )}
-                    </TouchableOpacity>
-                </View>
-
-                <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                    {/* Avatar Section */}
-                    <View style={styles.avatarSection}>
-                        <TouchableOpacity onPress={handleImagePicker} style={styles.avatarContainer}>
-                            <Image
-                                source={{ uri: profile.avatar || 'https://via.placeholder.com/150' }}
-                                style={styles.avatar}
-                            />
-                            <View style={styles.avatarOverlay}>
-                                <Text style={styles.avatarOverlayText}>Change Photo</Text>
-                            </View>
+                <View style={{ flex: 1 }}>
+                    {/* Header giữ nguyên */}
+                    <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.outline }]}>
+                        <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
+                            <Text style={[styles.cancelText, { color: theme.colors.onSurfaceVariant }]}>Cancel</Text>
+                        </TouchableOpacity>
+                        <Text style={[styles.headerTitle, { color: theme.colors.onBackground }]}>Edit Profile</Text>
+                        <TouchableOpacity
+                            onPress={handleSave}
+                            style={[styles.headerButton, saving && styles.disabledButton]}
+                            disabled={saving}
+                        >
+                            {saving ? (
+                                <ActivityIndicator size="small" color={theme.colors.primary} />
+                            ) : (
+                                <Text style={[styles.saveText, { color: theme.colors.primary }]}>Save</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
-
-                    {/* Form Section */}
-                    <View style={styles.formSection}>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>First Name</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profile.firstName}
-                                onChangeText={(text) => handleInputChange('firstName', text)}
-                                placeholder="Enter your first name"
-                                autoCapitalize="words"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Last Name</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profile.lastName}
-                                onChangeText={(text) => handleInputChange('lastName', text)}
-                                placeholder="Enter your last name"
-                                autoCapitalize="words"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Email</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profile.email}
-                                onChangeText={(text) => handleInputChange('email', text)}
-                                placeholder="Enter your email"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Phone Number</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profile.phone}
-                                onChangeText={(text) => handleInputChange('phone', text)}
-                                placeholder="Enter your phone number"
-                                keyboardType="phone-pad"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Date of Birth</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profile.dateOfBirth}
-                                onChangeText={(text) => handleInputChange('dateOfBirth', text)}
-                                placeholder="YYYY-MM-DD"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Bio</Text>
-                            <TextInput
-                                style={[styles.input, styles.bioInput]}
-                                value={profile.bio}
-                                onChangeText={(text) => handleInputChange('bio', text)}
-                                placeholder="Tell us about yourself"
-                                multiline
-                                numberOfLines={4}
-                                textAlignVertical="top"
-                            />
-                        </View>
-                    </View>
-                </ScrollView>
-
-
+                    <ScrollView
+                        contentContainerStyle={{ flexGrow: 1, backgroundColor: theme.colors.background }}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <TouchableWithoutFeedback>
+                            <View>
+                                {/* Avatar Section */}
+                                <View style={[styles.avatarSection, { backgroundColor: theme.colors.surface }]}>
+                                    <TouchableOpacity onPress={handleImagePicker} style={styles.avatarContainer}>
+                                        <Image
+                                            source={{ uri: selectedAvatar || userInfor?.avatarurl || DEFAULT_AVATAR }}
+                                            style={styles.avatar}
+                                        />
+                                        <View style={styles.avatarOverlay}>
+                                            <Text style={styles.avatarOverlayText}>Change Photo</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                                {/* Thông tin user chung */}
+                                <View style={[styles.formSection, { backgroundColor: theme.colors.background }]}>
+                                    {userInfor?.fullname && (
+                                        <View style={styles.inputGroup}>
+                                            <Text style={[styles.label, { color: theme.colors.onBackground }]}>Full Name</Text>
+                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.fullname}</Text>
+                                        </View>
+                                    )}
+                                    {userInfor?.email && (
+                                        <View style={styles.inputGroup}>
+                                            <Text style={[styles.label, { color: theme.colors.onBackground }]}>Email</Text>
+                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.email}</Text>
+                                        </View>
+                                    )}
+                                    {userInfor?.phonenumber && (
+                                        <View style={styles.inputGroup}>
+                                            <Text style={[styles.label, { color: theme.colors.onBackground }]}>Phone</Text>
+                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.phonenumber}</Text>
+                                        </View>
+                                    )}
+                                    {userInfor?.address && (
+                                        <View style={styles.inputGroup}>
+                                            <Text style={[styles.label, { color: theme.colors.onBackground }]}>Address</Text>
+                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.address}</Text>
+                                        </View>
+                                    )}
+                                    {/* Nếu là giáo viên, hiển thị thông tin giáo viên readonly */}
+                                    {userInfor?.teacher !== null && (
+                                        <View style={[styles.inputGroup, styles.teacherGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary + '33' }]}>
+                                            <Text style={[styles.label, { color: theme.colors.primary }]}>Teacher Info</Text>
+                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>ID: {userInfor?.teacher.teacherId}</Text>
+                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Name: {userInfor?.teacher.teacherName}</Text>
+                                            {userInfor?.teacher.subject && (
+                                                <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Subject: {userInfor.teacher.subject.subjectName}</Text>
+                                            )}
+                                        </View>
+                                    )}
+                                    {/* Nếu là phụ huynh, hiển thị thông tin các con readonly */}
+                                    {userInfor?.students && userInfor.students.length > 0 && (
+                                        <View style={[styles.inputGroup, styles.childrenGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+                                            <Text style={[styles.label, { color: theme.colors.primary }]}>Children</Text>
+                                            {userInfor.students?.map((stu: any) =>{
+                                                const dateOfBirtStudent = stu.dateOfBirth.slice(0,10);
+                                                return(
+                                                    <View key={stu.studentId} style={[styles.studentCard, { backgroundColor: theme.colors.background, borderColor: theme.colors.outline }]}>
+                                                    <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>ID: {stu.studentId}</Text>
+                                                    <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Name: {stu.name}</Text>
+                                                    {stu.class && <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Class: {stu.class.className}</Text>}
+                                                    <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Date of Birth: {(dateOfBirtStudent)}</Text>
+                                                </View>
+                                                )
+                                            })}
+                                        </View>
+                                    )}
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </ScrollView>
+                </View>
             </KeyboardAvoidingView>
         </MainLayout>
     );
@@ -415,6 +338,35 @@ const styles = StyleSheet.create({
     bioInput: {
         height: 100,
         paddingTop: 12,
+    },
+    teacherGroup: {
+        backgroundColor: '#f0f6ff',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#b3d1ff',
+    },
+    childrenGroup: {
+        backgroundColor: '#f9f9f9',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    studentCard: {
+        backgroundColor: '#fff',
+        borderRadius: 6,
+        padding: 10,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    studentDivider: {
+        height: 1,
+        backgroundColor: '#e0e0e0',
+        marginVertical: 6,
     },
 });
 
