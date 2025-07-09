@@ -24,7 +24,7 @@ export const teacherService = {
         try{
             return await teacherApi.getActivities();
         }catch(err){
-            console.error("List Student get failed:", err);
+            console.error("List Activity get failed:", err);
             return [];
         }
     },

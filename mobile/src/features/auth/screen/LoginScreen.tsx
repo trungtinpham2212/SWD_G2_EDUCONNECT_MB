@@ -7,9 +7,7 @@ import { ThemeContext } from '@/context/ThemeContext';
 import { Feather } from '@expo/vector-icons';
 import { FONTS } from '@/constants/fonts';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { COLORS } from '@/constants/colors'; 
-// import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import { RootStackParamList } from '@/types/navigation';
+import { COLORS } from '@/constants/colors';  
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { FormLoginRequest, authService } from '@/api'; 
 

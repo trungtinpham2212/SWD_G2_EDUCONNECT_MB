@@ -23,7 +23,7 @@ const ParentReportScreen: React.FC = () => {
 
     const [listReport, setListReport] = useState<Report[]>([]);
     const [page, setPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(1);
+    const [pageSize, setPageSize] = useState<number>(3);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
