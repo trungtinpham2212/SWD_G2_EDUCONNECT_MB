@@ -29,7 +29,7 @@ export type Period = {
 export type Activity = {
     activityid: number;
     isnegative: boolean;
-    activitytype: boolean;
+    activitytype: string;
 }
 
 export type PeriodResponse = {
@@ -38,4 +38,15 @@ export type PeriodResponse = {
     pageNumber: number,
     pageSize: number,
     totalPages: number
+}
+
+export type EvaluationStudentRequest = {
+    periodid: number;
+    content: string;
+    activityid: number;
+    students: StudentToEvaluation[]
+}
+
+export type StudentToEvaluation = {
+    studentid: string;
 }

@@ -1,4 +1,4 @@
-import { ScheduleTeacherQueryRequest, Period, PeriodResponse, Activity } from "@/api/teacher/teacherTypes";
+import { ScheduleTeacherQueryRequest, Period, PeriodResponse, Activity, EvaluationStudentRequest } from "@/api/teacher/teacherTypes";
 import {teacherApi} from '@/api/teacher/teacherApi';
 import { Student } from "@/api/parent/parentTypes";
 
@@ -34,6 +34,13 @@ export const teacherService = {
         }catch(err){
             console.error("List students get failed: ", err);
             return [];
+        }
+    },
+    evaluationStudent: async(payload: EvaluationStudentRequest) => {
+        try{
+            return await teacherApi.evaluationStudent(payload);
+        }catch(err){
+            console.error("Evaluate students failed: ", err);
         }
     }
 }

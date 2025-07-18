@@ -5,13 +5,14 @@ import { useState, useEffect } from 'react';
 import { SIZES } from '@/constants';
 import { NavigationProp, useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import {MainStackParamList} from '@/types/navigation'; 
-import { Student, teacherService, Activity } from '@/api'; 
+import { Student, teacherService, Activity,EvaluationStudentRequest, StudentToEvaluation } from '@/api'; 
 
 type EvaluationRouteProp = RouteProp<MainStackParamList, 'Evaluation'>;
 const windowHeight = Dimensions.get('window').height;
  
  
 const EvaluationScreen: React.FC = () => {
+    const navigation = useNavigation();
     const route = useRoute<EvaluationRouteProp>();
     const {classId, periodNo, nameClass, date, nameSubject} = route.params; 
     const theme = useTheme();
@@ -24,7 +25,11 @@ const EvaluationScreen: React.FC = () => {
     const styles = createStyles(theme);
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
-    const [numberOfStudents, setNumberOfStudents] = useState<number>(0); 
+    const [numberOfStudents, setNumberOfStudents] = useState<number>(0);  
+    const [evaluationStudent, setEvaluationStudent] = useState<EvaluationStudentRequest>();
+    const [evaluationContent, setEvaluationContent] = useState('');
+    const [sending, setSending] = useState(false);
+    const [successModal, setSuccessModal] = useState(false);
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -55,6 +60,46 @@ const EvaluationScreen: React.FC = () => {
             setCheckedStudents(newCheckedStudents);
         }
         setSelectAll(!selectAll);
+    };
+
+    const handleSendEvaluation = async () => {
+        // Lấy danh sách học sinh được chọn
+        const selectedStudentIds = Object.keys(checkedStudents).filter(
+            (id) => checkedStudents[Number(id)]
+        );
+        // Tạo mảng students cho payload
+        const studentsPayload = selectedStudentIds.map((id) => ({ studentid: id }));
+        // Kiểm tra dữ liệu đầu vào
+        if (!selectedActivity || studentsPayload.length === 0 ) {
+            alert('Vui lòng chọn hoạt động');
+            return;
+        }
+        let replacEvaluate = "";
+        if(!evaluationContent){
+            if (!activities) return;
+            const activity = activities.find(a => a.activityid === Number(selectedActivity));
+            replacEvaluate = activity ? activity.activitytype : "";
+        }
+        setSending(true);
+        // Tạo payload
+        const payload = {
+            periodid: periodNo,
+            content: (evaluationContent || replacEvaluate),
+            activityid: Number(selectedActivity),
+            students: studentsPayload,
+        };
+        try {
+            const response = await teacherService.evaluationStudent(payload);
+            if (response) {
+                setSuccessModal(true);
+            } else {
+                alert('Gửi đánh giá thất bại!');
+            }
+        } catch (err) {
+            alert('Có lỗi xảy ra khi gửi đánh giá!');
+        } finally {
+            setSending(false);
+        }
     };
 
     const handleCheckboxToggle = (studentid: number) => {
@@ -92,6 +137,12 @@ const EvaluationScreen: React.FC = () => {
                         Đóng
                     </Button>
                 </Modal>
+                <Modal visible={successModal} onDismiss={() => setSuccessModal(false)} contentContainerStyle={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>Gửi đánh giá thành công!</Text>
+                    <Button mode="contained" onPress={() => setSuccessModal(false)} style={{marginTop: 16}}>
+                        Đóng
+                    </Button>
+                </Modal>
             </Portal>
             {loading ? (
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -121,14 +172,16 @@ const EvaluationScreen: React.FC = () => {
                         placeholderTextColor={theme.colors.onSurface}
                         multiline
                         numberOfLines={4}
+                        value={evaluationContent}
+                        onChangeText={setEvaluationContent}
                     />
                 </View>
                 <View style={styles.buttonContainer}>
                     <Button mode="contained" onPress={handleSelectAll} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
                         Select all
                     </Button>
-                    <Button mode="contained" onPress={() => { }} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
-                        Add
+                    <Button mode="contained" onPress={handleSendEvaluation} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary} disabled={sending}>
+                        {sending ? <ActivityIndicator animating={true} color={theme.colors.onPrimary} size="small" /> : 'Send Evaluation'}
                     </Button>
                 </View> 
                 <View style={styles.activityAllContainer}>
