@@ -30,11 +30,11 @@ const ParentHomeScreen: React.FC = () => {
             icon: <MaterialCommunityIcons name="timetable" size={36} color='#333' />,
             screen: 'ParentSchedule',
         },
-        {
-            label: 'Report',
-            icon: <Octicons name="repo" size={36} color='#333' style={{paddingRight:6}} />,
-            screen: 'ParentReport',
-        },
+        // {
+        //     label: 'Report',
+        //     icon: <Octicons name="repo" size={36} color='#333' style={{paddingRight:6}} />,
+        //     screen: 'ParentReport',
+        // },
         {
             label: 'Teachers',
             icon: <MaterialCommunityIcons name="folder-information-outline" size={36} color='#333' />,
@@ -63,7 +63,7 @@ const ParentHomeScreen: React.FC = () => {
                             {navButtons.map((button, index) => (
                                 <View key={index} style={styles.containBtnNavigation}>
                                     <Pressable
-                                        onPress={() => navigation.navigate(button.screen as keyof MainStackParamList)}
+                                        onPress={() => navigation.navigate(button.screen as any)}
                                         style={({ pressed }) => [
                                             styles.button,
                                             {

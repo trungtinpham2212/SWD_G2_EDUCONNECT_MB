@@ -1,30 +1,67 @@
 import axiosInstance from "@/api/axiosConfig";
-import { ScheduleTeacherQueryRequest, Period, Activity, PeriodResponse,EvaluationStudentRequest } from "@/api/teacher/teacherTypes";
-import { Student } from "@/api/parent/parentTypes";
+import { ScheduleTeacherQueryRequest, Period, Activity, PeriodResponse,EvaluationStudentRequest,StudentByClassIdRequest,ReportStudentResponse, ActivitiesResponse, AICreateReportGroupRequest, StudentResponse } from "@/api/teacher/teacherTypes";
+import {ReportStudentQueryParam, ReportGroupQueryParams, StudentQueryParam, ActivityQueryParam} from '@/api/shared/filterTypes';
+import { Student, PagedStudentReportResponse, ReportGroup } from "@/api/parent/parentTypes";
 
 export const teacherApi = {
     getScheuleTeacher: async (payload : ScheduleTeacherQueryRequest) : Promise<PeriodResponse> => {
-        const response = await axiosInstance.get<PeriodResponse>('/api/periods/by-date',{
+        const response = await axiosInstance.get<PeriodResponse>('/api/periods',{
             params: {
                 ...payload
             }
         });
         return response.data;
     }, 
-    getStudentsHomeRoom: async(teacherId: number) : Promise<Student[]> => {
-        const response = await axiosInstance.get<Student[]>(`/api/students/by-teacher/${teacherId}`);
+    getStudentsByTeacherId: async(payload: StudentQueryParam) : Promise<StudentResponse> => {
+        const response = await axiosInstance.get<StudentResponse>('/api/students',{
+            params:{
+                ...payload
+            }
+        });
         return response.data;
     },
-    getActivities: async() : Promise<Activity[]> => {
-        const response = await axiosInstance.get<Activity[]>('/api/activities');
+    getActivities: async(payload: ActivityQueryParam) : Promise<ActivitiesResponse> => {
+        const response = await axiosInstance.get('/api/activities',{
+            params: {
+                ...payload
+            }
+        });
         return response.data;
     },
-    getStudentsByClassId: async(classId: number) : Promise<Student[]> => {
-        const response = await axiosInstance.get<Student[]>(`/api/students/by-class/${classId}`);
+    getStudentsByClassId: async(payload: StudentQueryParam) : Promise<Student[]> => {
+        const response = await axiosInstance.get<Student[]>('/api/students',{
+            params:{
+                ...payload
+            }
+        });
         return response.data;
     },
     evaluationStudent: async(payload: EvaluationStudentRequest) => {
         const response = await axiosInstance.post('/api/evaluations', payload);
+        return response.data;
+    },
+    getStudentReportsByTeacherId: async(payload:ReportGroupQueryParams ) : Promise<PagedStudentReportResponse> => {
+        const response = await axiosInstance.get('/api/report-groups',{
+            params:{
+                ...payload
+            }
+        });
+        return response.data
+    },
+    getReportGroupDetailById: async(reportGroupId: number) : Promise<ReportGroup> => {
+        const response = await axiosInstance.get(`/api/report-groups/${reportGroupId}`);
+        return response.data;
+    },
+    getStudentReportsByReportGroupId : async(payload:ReportStudentQueryParam ) : Promise<ReportStudentResponse> => {
+        const response = await axiosInstance.get('/api/report-students',{
+            params:{
+                ...payload
+            }
+        });
+        return response.data
+    },
+    createReportGroupWithAI: async(payload:AICreateReportGroupRequest): Promise<ReportGroup> => {
+        const response =await axiosInstance.post('/api/report-groups/ai-generate-group-report',payload);
         return response.data;
     }
 }

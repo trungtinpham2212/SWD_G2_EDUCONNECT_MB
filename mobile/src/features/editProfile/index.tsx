@@ -1,6 +1,6 @@
 import MainLayout from '@/layouts/MainLayout';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, TouchableWithoutFeedback} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, TouchableWithoutFeedback } from 'react-native';
 import { TextInput } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse, MediaType, ImageLibraryOptions } from 'react-native-image-picker';
 import { UserInfor, authService } from '@/api';
@@ -20,18 +20,34 @@ const DEFAULT_AVATAR = 'https://i.pinimg.com/564x/32/25/b1/3225b1ec8c0064fba95d2
 
 const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) => {
     const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false); 
+    const [saving, setSaving] = useState(false);
     const { authState } = useAuth();
     const userId = authState.user?.userId!;
     const [userInfor, setUserInfor] = useState<UserInfor | null>(null);
     const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
-    const theme = useTheme(); 
-    useEffect(() => {
+    const theme = useTheme();
+
+    const fetchUserAsync = async () => {
+        if (!userId) return;
         setLoading(true);
-        authService.getUserById(userId).then((res) => {
-            setUserInfor(res);
+        try {
+            const response = await authService.getUserById(userId);
+            if (response) {
+                setUserInfor(response); 
+            } 
+        } catch (err) {
             setLoading(false);
-        }).catch(() => setLoading(false));
+
+        } finally {
+            setLoading(false);
+
+        }
+    }
+
+
+
+    useEffect(() => {
+         fetchUserAsync();
     }, [userId]);
 
 
@@ -162,7 +178,7 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
                                 <View style={[styles.avatarSection, { backgroundColor: theme.colors.surface }]}>
                                     <TouchableOpacity onPress={handleImagePicker} style={styles.avatarContainer}>
                                         <Image
-                                            source={{ uri: selectedAvatar || userInfor?.avatarurl || DEFAULT_AVATAR }}
+                                            source={{ uri: selectedAvatar || userInfor?.avatarUrl || DEFAULT_AVATAR }}
                                             style={styles.avatar}
                                         />
                                         <View style={styles.avatarOverlay}>
@@ -211,15 +227,15 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
                                     {userInfor?.students && userInfor.students.length > 0 && (
                                         <View style={[styles.inputGroup, styles.childrenGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
                                             <Text style={[styles.label, { color: theme.colors.primary }]}>Children</Text>
-                                            {userInfor.students?.map((stu: any) =>{
-                                                const dateOfBirtStudent = stu.dateOfBirth.slice(0,10);
-                                                return(
+                                            {userInfor.students?.map((stu: any) => {
+                                                const dateOfBirtStudent = stu.dateOfBirth.slice(0, 10);
+                                                return (
                                                     <View key={stu.studentId} style={[styles.studentCard, { backgroundColor: theme.colors.background, borderColor: theme.colors.outline }]}>
-                                                    <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>ID: {stu.studentId}</Text>
-                                                    <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Name: {stu.name}</Text>
-                                                    {stu.class && <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Class: {stu.class.className}</Text>}
-                                                    <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Date of Birth: {(dateOfBirtStudent)}</Text>
-                                                </View>
+                                                        <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>ID: {stu.studentId}</Text>
+                                                        <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Name: {stu.name}</Text>
+                                                        {stu.class && <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Class: {stu.class.className}</Text>}
+                                                        <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>Date of Birth: {(dateOfBirtStudent)}</Text>
+                                                    </View>
                                                 )
                                             })}
                                         </View>

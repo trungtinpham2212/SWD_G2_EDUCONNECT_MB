@@ -1,36 +1,43 @@
 import axiosInstance from "@/api/axiosConfig";
-import {Student, ScheduleStudentQueryRequest, StudentReportQueryRequest, PagedStudentReportResponse, TeachersOfStudentRequest, TeachersOfStudentResponse} from '@/api/parent/parentTypes';
+import {Student, PagedStudentReportResponse, TeachersOfStudentResponse, StudentFilterRequest, ChatbotSendRequest, ChatbotResponse} from '@/api/parent/parentTypes';
 import { PeriodResponse } from "@/api/teacher/teacherTypes";
-
+import { PeriodQueryparam, ReportGroupQueryParams, StudentQueryParam, TeacherQueryParam } from "@/api/shared/filterTypes";
 export const parentApi = {
-    getStudentsByParentId : async(parentId:number) : Promise<Student[]> =>{
-        const response = await axiosInstance.get<Student[]>(`/api/students/parent/${parentId}`);
-        return response.data;
-    },
-    getStudentSchedule : async(payload:ScheduleStudentQueryRequest) : Promise<PeriodResponse> => {
-        const response = await axiosInstance.get<PeriodResponse>('/api/periods/by-date-class', {
+    getStudentsByParentId : async(payload:StudentQueryParam) : Promise<Student[]> =>{
+        const response = await axiosInstance.get<Student[]>('/api/students',{
             params: {
                 ...payload
             }
         });
         return response.data;
     },
-    getStudentReports : async(payload:StudentReportQueryRequest) :Promise<PagedStudentReportResponse> => {
-        const { studentId, page, pageSize } = payload;
-        const response = await axiosInstance.get<PagedStudentReportResponse>(`/api/report-students/student/${studentId}`,{
+    getStudentSchedule : async(payload:PeriodQueryparam) : Promise<PeriodResponse> => {
+        const response = await axiosInstance.get<PeriodResponse>('/api/periods', {
             params: {
-                page , pageSize
+                ...payload
             }
         });
         return response.data;
     },
-    getTeachersOfStudent : async(payload: TeachersOfStudentRequest) : Promise<TeachersOfStudentResponse> =>{
-        const {classId, start, end, page, pageSize} = payload;
-        const response = await axiosInstance.get<TeachersOfStudentResponse>(`/api/teachers/by-class/${classId}`,{
+    getStudentReportsGroupByStId : async(payload:ReportGroupQueryParams) :Promise<PagedStudentReportResponse> => {
+        // const { studentId, page, pageSize } = payload;
+        const response = await axiosInstance.get<PagedStudentReportResponse>('/api/report-groups',{
             params:{
-                start, end, page, pageSize
+                ...payload
             }
         });
+        return response.data;
+    },
+    getTeachersOfStudent : async(payload: TeacherQueryParam) : Promise<TeachersOfStudentResponse> =>{ 
+        const response = await axiosInstance.get<TeachersOfStudentResponse>('/api/teachers',{
+            params:{
+                ...payload
+            }
+        });
+        return response.data;
+    },
+    getChatbotMessage: async(payload: ChatbotSendRequest) : Promise<ChatbotResponse> => {
+        const response = await axiosInstance.post('/api/chat-boxes', payload);
         return response.data;
     }
 }

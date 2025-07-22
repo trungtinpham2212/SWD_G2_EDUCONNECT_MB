@@ -1,11 +1,11 @@
 import { Teacher } from "@/api/teacher/teacherTypes";
 
-export type ScheduleStudentQueryRequest = {
-    date: string;
-    classId: number
-    page: number | 1;
-    pageSize: number | 30;
-}
+// export type ScheduleStudentQueryRequest = {
+//     date: string;
+//     classId: number
+//     page: number | 1;
+//     pageSize: number | 30;
+// }
 
 export type Student = {
     studentid: number;
@@ -16,12 +16,7 @@ export type Student = {
     class: StudentClass | null;
     parent: Parent | null;
 }
-
-export type StudentReportQueryRequest = { 
-    studentId : number;
-    page: number;
-    pageSize: number;
-}
+ 
 
 export type PagedStudentReportResponse = {
     items : Report[];
@@ -31,13 +26,6 @@ export type PagedStudentReportResponse = {
     totalPages: number;
 } 
 
-export type TeachersOfStudentRequest = {
-    classId : number;
-    start: string ;
-    end: string;
-    page: number;
-    pageSize: number;
-}
 
 export type TeachersOfStudentResponse = {
     items : Teacher[];
@@ -71,7 +59,10 @@ export type Report = {
     reportstudentid: number;
     reportgroupid: number;
     studentid: number;
+    title:string;
     content: string;
+    startdate: string;
+    enddate: string;
     status: string;
     createat: string;
     updateat: string;
@@ -79,14 +70,54 @@ export type Report = {
     student: Student | null;
 }
 
-type ReportGroup = {
+export type ReportGroup = {
     reportgroupid: number;
     teacherid: number;
     title: string;
     content: string;
     startdate: string;
-    enddateenddate: string;
+    enddate: string;
     status: string;
     createat: string;
-    updateat: string;
+    updateat: string; 
+    reportStudents: Report[];
+    students: Student[];
+}
+
+export type StudentFilterRequest  = {
+    parentId: number;
+    page: number;
+    pageSize: number;
+}
+
+export type ChatbotSendRequest ={
+    messagetext: string;
+    parentId: number;
+}
+
+export type ChatbotResponse = {
+    success: boolean;
+    errorMessage: string;
+    data: {
+        messageid: number;
+        chatboxid: number;
+        messagetext: string;
+        isparent: boolean;
+        createat: string;
+        chatbox: Chatbox ;
+    }
+}
+
+export type Chatbox = {
+    chatboxid: number;
+    parentid: number;
+    chatMessages: ChatMessage[];
+}
+export type ChatMessage = {
+    messageid: number;
+    chatboxid: number;
+    messagetext: string;
+    isparent: boolean;
+    createat: string;
+
 }

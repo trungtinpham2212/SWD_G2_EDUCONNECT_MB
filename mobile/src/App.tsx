@@ -7,7 +7,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { ThemeProvider, ThemeContext } from '@/context/ThemeContext';
 import { lightTheme, darkTheme } from '@/constants/theme';
 import RootNavigator from '@/navigation/RootNavigator';
-import { AuthProvider } from './features/auth/context/AuthContext';
+import { AuthProvider } from '@/features/auth/context/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
 

@@ -1,20 +1,17 @@
-import { COLORS, SIZES } from "@/constants"; 
-import { useState, useEffect, memo } from "react";
-import { ActivityIndicator, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import { COLORS, SIZES } from "@/constants";
+import { useState, useEffect, memo, useCallback } from "react";
+import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import { View } from "react-native";
 import { useTheme } from "react-native-paper";
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { Student, teacherService } from "@/api";
+import { Student, teacherService, StudentQueryParam } from "@/api";
 import { FlatList } from "react-native";
 
 const windowHeight = Dimensions.get('window').height;
 
 const ClassStudentScreen: React.FC = () => {
     const theme = useTheme();
-    // const navigation = useNavigation();
-    const [name, setName] = useState('');
-    const [debouncedName, setDebouncedName] = useState(name);
-
+    const [searchQuery, setSearchQuery] = useState('');
     const [students, setStudents] = useState<Student[]>([]);
     const [className, setClassName] = useState<string>('');
 
@@ -22,64 +19,120 @@ const ClassStudentScreen: React.FC = () => {
     const teacherId = authState.user?.teacherId!;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState<number>(1);
+    const [pageSize, setPageSize] = useState<number>(40);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [initialStudentsLoading, setInitialStudentsLoading] = useState(true);
+    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedName(name);
-        }, 500);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [name]);
-
-    useEffect(() => {
-        const fetchStudents = async () => {
-            if (!teacherId) return;
-
-            setLoading(true);
-            setError(null);
-            try { 
-                const data = await teacherService.getStudentsByTeacherId(teacherId);
-                if (Array.isArray(data) && data.length > 0) {
-                    const firstStudent = data[0];
-                    const className = firstStudent?.class?.classname ?? 'Unknown Class';
-
-                    setClassName(className);
-                    setStudents(data);
-                } else {
-                    setClassName('No Class Found');
-                    setStudents([]);
-                }
-            } catch (err) {
-                setError('Failed to load Student');
-                console.error('Error fetching student:', err);
-                setStudents([]);
-            } finally {
-                setLoading(false);
+    const fetchStudentbyTeacherId = useCallback(async (nextPage = 1, append = false, searchName = '') => {
+        if (!append && nextPage === 1) setLoading(true);
+        try {
+            const payload: StudentQueryParam = {
+                teacherId,
+                page: nextPage,
+                pageSize,
+                name: searchName || undefined // Thêm name vào payload nếu có
             }
-        };
-        fetchStudents();
+            
+            const response = await teacherService.getStudentsByTeacherId(payload);
+            if (response) {
+                setHasMore(response.pageNumber < response.totalPages);
+                if (append) {
+                    setStudents(prev => [...prev, ...response.items]);
+                } else {
+                    setStudents(response.items);
+                }
+                setPage(response.pageNumber);
+                
+                // Set class name từ student đầu tiên nếu có
+                if (response.items.length > 0 && !className) {
+                    const firstStudent = response.items[0];
+                    const newClassName = firstStudent?.class?.classname ?? 'Unknown Class';
+                    setClassName(newClassName);
+                }
+            }
+        } catch (err) {
+            setError('Failed to load Student');
+            console.error('Error fetching student:', err);
+            setStudents([]);
+        } finally {
+            if (!append && nextPage === 1) {
+                setLoading(false);
+                setInitialStudentsLoading(false);
+            }
+        }
+    }, [teacherId, pageSize, className]);
+
+    const handleSearch = useCallback((query: string) => {
+        setSearchQuery(query);
+        
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        
+        const timeout = setTimeout(() => {
+            setPage(1);
+            setHasMore(true);
+            fetchStudentbyTeacherId(1, false, query);
+        }, 500);
+        
+        setSearchTimeout(timeout);
+    }, [fetchStudentbyTeacherId, searchTimeout]);
+
+    const handleLoadMore = () => {
+        if (!loadingMore && hasMore) {
+            setLoadingMore(true);
+            fetchStudentbyTeacherId(page + 1, true, searchQuery).finally(() => setLoadingMore(false));
+        }
+    };
+
+    const handleRefresh = async () => {
+        if (loading || initialStudentsLoading || !teacherId) return;
+        setRefreshing(true);
+        setPage(1);
+        setHasMore(true);
+        setStudents([]);
+        try {
+            await fetchStudentbyTeacherId(1, false, searchQuery);
+        } catch (err) {
+            Alert.alert('Lỗi', 'Không thể làm mới danh sách học sinh. Vui lòng thử lại.');
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!teacherId) return;
+        setPage(1);
+        setHasMore(true);
+        fetchStudentbyTeacherId(1, false, '');
     }, [teacherId]);
 
-    function normalize(str: string) {
-        return str.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-    }
-    const filteredStudents = students.filter(student => normalize(student.name).includes(normalize(debouncedName)));
+    // Cleanup timeout khi component unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+        };
+    }, [searchTimeout]);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={[styles.container, { backgroundColor: theme.colors.surface }]}>
                 <View style={styles.mainContent}>
-                    {/* <Text style={styles.infoLabel}>Lớp</Text> */}
                     <View style={[styles.infoValueContainer,
-                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline, },
+                        { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline, },
                     ]}>
-                        <Text style={[styles.infoValue, { color: theme.colors.onSurface, },]} >
+                        <Text style={[styles.infoValue, { color: theme.colors.onSurface, }]} >
                             Class: {className}
                         </Text>
                     </View>
+                    
                     <View>
                         <TextInput
                             style={[
@@ -91,35 +144,51 @@ const ClassStudentScreen: React.FC = () => {
                                 },
                             ]}
                             placeholder="Search by name..."
-                            placeholderTextColor={theme.colors.onSurfaceVariant} // Tách ra khỏi style
-                            value={name}
-                            onChangeText={setName}
-
+                            placeholderTextColor={theme.colors.onSurfaceVariant}
+                            value={searchQuery}
+                            onChangeText={handleSearch}
                         />
                     </View>
+                    
                     <View style={[styles.listCard, { height: windowHeight * 0.7 }]}>
-                        {loading ? (
+                        {loading && !refreshing ? (
                             <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
                         ) : error ? (
                             <View>
                                 <Image style={styles.imgNodata} source={{ uri: 'https://cdni.iconscout.com/illustration/premium/thumb/woman-with-no-appointment-illustration-download-in-svg-png-gif-file-formats--waiting-issue-empty-state-pack-people-illustrations-10922122.png' }} />
                                 <Text style={[styles.noDataText, { color: theme.colors.onSurface }]}>
-                                    No schedule available
+                                    No Student
                                 </Text>
                             </View>
                         ) : (
                             <FlatList
-                                data={filteredStudents}
+                                data={students}
                                 renderItem={({ item }) => <RenderItemStudent item={item} />}
                                 keyExtractor={(item) => item.studentid.toString()}
                                 contentContainerStyle={styles.scheduleList}
                                 showsVerticalScrollIndicator={true}
+                                onEndReached={handleLoadMore}
+                                onEndReachedThreshold={0.2}
+                                refreshing={refreshing}
+                                onRefresh={handleRefresh}
+                                ListFooterComponent={() => 
+                                    loadingMore ? (
+                                        <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 10 }} />
+                                    ) : null
+                                }
+                                ListEmptyComponent={() => 
+                                    !loading ? (
+                                        <View>
+                                            <Image style={styles.imgNodata} source={{ uri: 'https://cdni.iconscout.com/illustration/premium/thumb/woman-with-no-appointment-illustration-download-in-svg-png-gif-file-formats--waiting-issue-empty-state-pack-people-illustrations-10922122.png' }} />
+                                            <Text style={[styles.noDataText, { color: theme.colors.onSurface }]}>
+                                                {searchQuery ? 'No students found for your search' : 'No students available'}
+                                            </Text>
+                                        </View>
+                                    ) : null
+                                }
                             />
-                        )
-                        }
-
+                        )}
                     </View>
-
                 </View>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
@@ -154,7 +223,6 @@ const RenderItemStudent = memo(({ item }: { item: Student }) => {
         </TouchableWithoutFeedback>
     )
 });
-
 
 const styles = StyleSheet.create({
     container: {
@@ -233,7 +301,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 10,
         paddingVertical: 2,
-        // overflow: 'hidden',
     },
     cardContentItemTextLeft: {
         fontSize: 16,
@@ -286,7 +353,6 @@ const styles = StyleSheet.create({
     scheduleList: {
         paddingBottom: 0,
     },
-
     errorText: {
         fontSize: 16,
         textAlign: 'center',

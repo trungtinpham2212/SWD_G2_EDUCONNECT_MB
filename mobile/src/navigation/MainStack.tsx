@@ -15,6 +15,9 @@ import EvaluationScreen from '@/features/evaluation';
 import EditProfileScreen from '@/features/editProfile'; 
 import NotificationTest from '@/features/notification/NotificationTest';
 import TeacherReportScreen from '@/features/report/teacher';
+import CreateReportScreen from '@/features/report/teacher/create';
+import DetailReportScreen from '@/features/report/teacher/detail';
+import { useFCMTokenSync } from '@/features/auth/hooks/useAuthEffect';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -22,7 +25,8 @@ const MainStack: React.FC = () => {
   const { getUserRole } = useAuth();
   const userRole = getUserRole();
   const theme = useTheme();
-
+  
+  useFCMTokenSync();
   return (
     <Stack.Navigator
       screenOptions={{
@@ -57,6 +61,9 @@ const MainStack: React.FC = () => {
           <Stack.Screen name='Evaluation' component={EvaluationScreen} />
           <Stack.Screen name='EditProfile' component={EditProfileScreen} options={{headerShown:false}}/>
           <Stack.Screen name='TeacherReport' component={TeacherReportScreen} />
+          <Stack.Screen name='CreateReport' component={CreateReportScreen} />
+          <Stack.Screen name='TeacherReportDetail' component={DetailReportScreen} />
+
         </>
       )}
     </Stack.Navigator>

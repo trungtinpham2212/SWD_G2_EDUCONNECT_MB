@@ -6,9 +6,8 @@ import { useTheme } from 'react-native-paper';
 import { SIZES } from '@/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { parentService, Student, PagedStudentReportResponse, Report, StudentReportQueryRequest } from '@/api';
-import { useAuth } from '@/features/auth/context/AuthContext';
-import SplashScreen from '@/features/splash/SplashScreen';  
+import { parentService, Student, PagedStudentReportResponse, Report, StudentFilterRequest, ReportGroupQueryParams } from '@/api';
+import { useAuth } from '@/features/auth/context/AuthContext'; 
 import moment from 'moment';
 // import DateRangeSelector from '@/features/report/parent/components/DateRangeSelector';
  
@@ -23,7 +22,7 @@ const ParentReportScreen: React.FC = () => {
 
     const [listReport, setListReport] = useState<Report[]>([]);
     const [page, setPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(3);
+    const [pageSize, setPageSize] = useState<number>(2);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -119,12 +118,12 @@ const ParentReportScreen: React.FC = () => {
     const fetchReportStudent = async (studentId: number, nextPage = 1, append = false) => {
         if (!append && nextPage === 1) setLoading(true);
         try {
-            const payload: StudentReportQueryRequest = {
+            const payload: ReportGroupQueryParams = {
                 studentId,
                 page: nextPage,
                 pageSize
             };
-            const response = await parentService.getStudentReports(payload);
+            const response = await parentService.getStudentReportsGroupByStId(payload);
             if (response) {
                 setHasMore(response.pageNumber < response.totalPages);
                 if (append) {
@@ -149,7 +148,12 @@ const ParentReportScreen: React.FC = () => {
             if (!parentId) return;
             try {
                 setLoadingStudents(true);
-                const data = await parentService.getStudentsByParentId(parentId);
+                const payoad : StudentFilterRequest ={
+                    parentId,
+                    page:1,
+                    pageSize: 50
+                }
+                const data = await parentService.getStudentsByParentId(payoad);
                 setStudents(data);
                 if (data.length > 0) {
                     const firstStudent = data[0];
@@ -198,10 +202,7 @@ const ParentReportScreen: React.FC = () => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>   
-            <View style={styles.mainContent}>
-                {/* <DateRangeSelector /> */}
-
-                {/* Dropdown chọn học sinh */}
+            <View style={styles.mainContent}> 
                 <View style={styles.dropdownRow}>
                     <Picker
                         selectedValue={selectedName}

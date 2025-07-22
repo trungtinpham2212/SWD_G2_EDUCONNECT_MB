@@ -63,7 +63,7 @@ export type UserInfor = {
   address: string;
   status: true;
   roleId: number;
-  avatarurl: string | null;
+  avatarUrl: string | null;
   teacher: TeacherInfor | null;
   students: Student[] | null;
 }

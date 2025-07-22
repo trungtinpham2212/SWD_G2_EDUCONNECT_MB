@@ -9,7 +9,8 @@ import { FONTS } from '@/constants/fonts';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { COLORS } from '@/constants/colors';  
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { FormLoginRequest, authService } from '@/api'; 
+import { FcmTokenRequest, FormLoginRequest, authService, createAndSendToken } from '@/api';  
+import { useFCMTokenSync } from '@/features/auth/hooks/useAuthEffect';
 
 // type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 
 
@@ -35,7 +36,7 @@ const LoginScreen = () => {
           setErrorResponse('Tài khoản này không có quyền truy cập ứng dụng.');
           setIsLoading(false);
           return;
-        }
+        } 
         await login(res.token, {
           email: res.email,
           userName: res.userName,
@@ -46,7 +47,8 @@ const LoginScreen = () => {
           phoneNumber: res.phoneNumber,
           address: res.address,
           avatarURL: res.avatarURL   
-        });  
+        });   
+        await createAndSendToken(Number(res.userId));
       } else {
         console.log("Login failed: dd");
         setErrorResponse(res.message);

@@ -7,7 +7,7 @@ import { Picker } from '@react-native-picker/picker';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { Period, ScheduleStudentQueryRequest, Student, parentService } from '@/api';
+import { Period, Student, parentService,StudentFilterRequest, StudentQueryParam, PeriodQueryparam } from '@/api';
 
 const { width } = Dimensions.get('window');
 
@@ -92,7 +92,7 @@ const ParentScheduleScreen: FC = () => {
             setLoading(true);
             setError(null);
             
-            const payload: ScheduleStudentQueryRequest = {
+            const payload: PeriodQueryparam = {
                 date,
                 classId: classId,
                 page: 1,
@@ -117,7 +117,12 @@ const ParentScheduleScreen: FC = () => {
             if (!parentId) return;
             try {
                 setLoadingStudents(true);
-                const data = await parentService.getStudentsByParentId(parentId);
+                const payload: StudentQueryParam={
+                    parentId,
+                    page:1,
+                    pageSize: 30
+                }
+                const data = await parentService.getStudentsByParentId(payload);
                 setStudents(data);
                 if (data.length > 0) {
                     const firstStudent = data[0];

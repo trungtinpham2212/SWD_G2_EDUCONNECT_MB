@@ -1,4 +1,4 @@
-import { parentService, Student, Teacher, TeachersOfStudentRequest } from "@/api";
+import { parentService, Student, StudentFilterRequest, Teacher, TeacherQueryParam } from "@/api";
 import { COLORS, SIZES } from "@/constants";
 import MainLayout from "@/layouts/MainLayout";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,7 +37,7 @@ const ChildTeachersScreen: React.FC = () => {
     const fetchTeacherOfStudent = async(classId : number, nextPage = 1, append = false ) => {
         if (!append && nextPage === 1) setLoading(true);
         try{
-            const payload: TeachersOfStudentRequest = {
+            const payload: TeacherQueryParam = {
                 classId,
                 start: '2024-11-01',
                 end: '2025-03-01',
@@ -70,7 +70,12 @@ const ChildTeachersScreen: React.FC = () => {
             if (!parentId) return;
             try {
                 setLoadingStudents(true);
-                const data = await parentService.getStudentsByParentId(parentId);
+                const payload : StudentFilterRequest = {
+                    parentId,
+                    page: 1,
+                    pageSize: 50
+                }
+                const data = await parentService.getStudentsByParentId(payload);
                 setStudents(data);
                 if (data.length > 0) {
                     const firstStudent = data[0];

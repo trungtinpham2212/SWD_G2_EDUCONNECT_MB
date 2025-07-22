@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (token: string, userData: AuthState['user']) => {
+  const login = async (token: string, userData: AuthState['user']) => { 
     await storeToken(token);
     if (userData) {
       await storeUserData(userData);

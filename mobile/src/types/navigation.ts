@@ -29,6 +29,11 @@ export type MainStackParamList = {
   };
   NotificationTest: undefined;
   EditProfile : undefined;
+  
+  CreateReport: undefined;
+  TeacherReportDetail: {
+    reportGroupdId : number;
+  }
 };
 
 export type BottomTabParamList = {

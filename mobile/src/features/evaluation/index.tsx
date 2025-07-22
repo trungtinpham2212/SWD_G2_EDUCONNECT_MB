@@ -1,20 +1,18 @@
 import { View, Text, TextInput, StyleSheet, Dimensions, ScrollView } from 'react-native';
-import { Button, Checkbox, useTheme, ActivityIndicator, Modal, Portal } from 'react-native-paper';
+import { Button, Checkbox, useTheme, ActivityIndicator, Modal, Portal, SegmentedButtons } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import { useState, useEffect } from 'react';
 import { SIZES } from '@/constants';
 import { NavigationProp, useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import {MainStackParamList} from '@/types/navigation'; 
-import { Student, teacherService, Activity,EvaluationStudentRequest, StudentToEvaluation } from '@/api'; 
+import { MainStackParamList } from '@/types/navigation';
+import { Student, teacherService, Activity, EvaluationStudentRequest, StudentToEvaluation, StudentQueryParam, ActivityQueryParam } from '@/api';
 
-type EvaluationRouteProp = RouteProp<MainStackParamList, 'Evaluation'>;
-const windowHeight = Dimensions.get('window').height;
- 
- 
+type EvaluationRouteProp = RouteProp<MainStackParamList, 'Evaluation'>; 
+
 const EvaluationScreen: React.FC = () => {
     const navigation = useNavigation();
     const route = useRoute<EvaluationRouteProp>();
-    const {classId, periodNo, nameClass, date, nameSubject} = route.params; 
+    const { classId, periodNo, nameClass, date, nameSubject } = route.params;
     const theme = useTheme();
     const [searchText, setSearchText] = useState('');
     const [selectedActivity, setSelectedActivity] = useState('');
@@ -25,29 +23,55 @@ const EvaluationScreen: React.FC = () => {
     const styles = createStyles(theme);
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
-    const [numberOfStudents, setNumberOfStudents] = useState<number>(0);  
+    const [numberOfStudents, setNumberOfStudents] = useState<number>(0);
     const [evaluationStudent, setEvaluationStudent] = useState<EvaluationStudentRequest>();
     const [evaluationContent, setEvaluationContent] = useState('');
     const [sending, setSending] = useState(false);
     const [successModal, setSuccessModal] = useState(false);
+    const [isnegative, setIsnegative] = useState<boolean>(true);
+    const [value, setValue] = useState('');
+
+    const onChangeIsnegative = (newValue: string) => {
+        setValue(newValue);
+        setIsnegative(newValue === 'Negative'); 
+    }
+
+    const fetchActivities = async() => {
+        try {
+            const payload: ActivityQueryParam = {
+                isnegative,
+                page: 1,
+                pageSize: 10
+            }
+            const activitiesRes = await teacherService.getActivities(payload);
+            if (activitiesRes) setActivities(activitiesRes.items);
+        } catch (err) { }
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
+            setValue('Negative');
             try {
-                const studentsRes = await teacherService.getStudentsByClassId(classId);
-                if (studentsRes){
+                const payload: StudentQueryParam = {
+                    classId,
+                    page: 1,
+                    pageSize: 100
+                }
+                const studentsRes = await teacherService.getStudentsByClassId(payload);
+                if (studentsRes) {
                     setStudents(studentsRes);
                     setNumberOfStudents(studentsRes.length);
-                } 
-            } catch (err) {}
-            try {
-                const activitiesRes = await teacherService.getActivities();
-                if (activitiesRes) setActivities(activitiesRes);
-            } catch (err) {}
+                }
+            } catch (err) { }
+            await fetchActivities(); 
             setLoading(false);
         };
         fetchData();
     }, [classId]);
+    useEffect(() => {
+        fetchActivities(); // chỉ gọi lại khi isnegative đổi
+      }, [isnegative]);
 
     const handleSelectAll = () => {
         if (selectAll) {
@@ -70,12 +94,12 @@ const EvaluationScreen: React.FC = () => {
         // Tạo mảng students cho payload
         const studentsPayload = selectedStudentIds.map((id) => ({ studentid: id }));
         // Kiểm tra dữ liệu đầu vào
-        if (!selectedActivity || studentsPayload.length === 0 ) {
+        if (!selectedActivity || studentsPayload.length === 0) {
             alert('Vui lòng chọn hoạt động');
             return;
         }
         let replacEvaluate = "";
-        if(!evaluationContent){
+        if (!evaluationContent) {
             if (!activities) return;
             const activity = activities.find(a => a.activityid === Number(selectedActivity));
             replacEvaluate = activity ? activity.activitytype : "";
@@ -133,94 +157,110 @@ const EvaluationScreen: React.FC = () => {
                     <Text style={styles.modalText}>Sĩ số: {numberOfStudents}</Text>
                     <Text style={styles.modalText}>Ngày: {date}</Text>
                     <Text style={styles.modalText}>Môn học: {nameSubject}</Text>
-                    <Button mode="contained" onPress={() => setModalVisible(false)} style={{marginTop: 16}}>
+                    <Button mode="contained" onPress={() => setModalVisible(false)} style={{ marginTop: 16 }}>
                         Đóng
                     </Button>
                 </Modal>
                 <Modal visible={successModal} onDismiss={() => setSuccessModal(false)} contentContainerStyle={styles.modalContainer}>
                     <Text style={styles.modalTitle}>Gửi đánh giá thành công!</Text>
-                    <Button mode="contained" onPress={() => setSuccessModal(false)} style={{marginTop: 16}}>
+                    <Button mode="contained" onPress={() => setSuccessModal(false)} style={{ marginTop: 16 }}>
                         Đóng
                     </Button>
                 </Modal>
             </Portal>
             {loading ? (
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator animating={true} size="large" color={theme.colors.primary} />
                 </View>
             ) : (
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.header}>
-                    <Button mode="outlined" onPress={() => setModalVisible(true)} style={styles.infoButton}>
-                        Thông tin buổi học
-                    </Button>
-                </View>
-                <View style={styles.searchContainer}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search by name..."
-                        placeholderTextColor={theme.colors.onSurface}
-                        value={searchText}
-                        onChangeText={setSearchText}
-                    />
-                </View>
-                <View style={styles.evaluateContainer}>
-                    <Text style={styles.evaluateLabel}>Evaluate</Text>
-                    <TextInput
-                        style={styles.evaluateArea}
-                        placeholder="Enter evaluation..."
-                        placeholderTextColor={theme.colors.onSurface}
-                        multiline
-                        numberOfLines={4}
-                        value={evaluationContent}
-                        onChangeText={setEvaluationContent}
-                    />
-                </View>
-                <View style={styles.buttonContainer}>
-                    <Button mode="contained" onPress={handleSelectAll} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
-                        Select all
-                    </Button>
-                    <Button mode="contained" onPress={handleSendEvaluation} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary} disabled={sending}>
-                        {sending ? <ActivityIndicator animating={true} color={theme.colors.onPrimary} size="small" /> : 'Send Evaluation'}
-                    </Button>
-                </View> 
-                <View style={styles.activityAllContainer}>
-                    <Text style={styles.activityAllLabel}>Activity:</Text>
-                    <View style={[styles.pickerContainer, { flex: 1 }]}> 
-                        <Picker
-                            selectedValue={selectedActivity}
-                            onValueChange={(value) => setSelectedActivity(value as string)}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="Activity" value="" />
-                            {activities.map((activity, idx) => (
-                                <Picker.Item 
-                                    key={activity.activityid} 
-                                    label={activity.activitytype ? activity.activitytype.toString() : activity.activityid.toString()} 
-                                    value={activity.activityid.toString()} 
-                                />
-                            ))}
-                        </Picker>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <View style={styles.header}>
+                        <Button mode="outlined" onPress={() => setModalVisible(true)} style={styles.infoButton}>
+                            Thông tin buổi học
+                        </Button>
                     </View>
-                </View>
-                <View style={styles.studentList}>
-                    <Text style={styles.activityAllLabel}>List Students:</Text>
-                    {filteredStudents.map((student) => (
-                        <View key={student.studentid} style={styles.studentItem}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <View style={styles.studentCheckbox}>
-                                    <Checkbox
-                                        status={checkedStudents[student.studentid] ? 'checked' : 'unchecked'}
-                                        onPress={() => handleCheckboxToggle(student.studentid)}
-                                        color={theme.colors.primary}
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search by name..."
+                            placeholderTextColor={theme.colors.onSurface}
+                            value={searchText}
+                            onChangeText={setSearchText}
+                        />
+                    </View>
+                    <View style={styles.evaluateContainer}>
+                        <Text style={styles.evaluateLabel}>Evaluate</Text>
+                        <TextInput
+                            style={styles.evaluateArea}
+                            placeholder="Enter evaluation..."
+                            placeholderTextColor={theme.colors.onSurface}
+                            multiline
+                            numberOfLines={4}
+                            value={evaluationContent}
+                            onChangeText={setEvaluationContent}
+                        />
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <Button mode="contained" onPress={handleSelectAll} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
+                            Select all
+                        </Button>
+                        <Button mode="contained" onPress={handleSendEvaluation} style={styles.button} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary} disabled={sending}>
+                            {sending ? <ActivityIndicator animating={true} color={theme.colors.onPrimary} size="small" /> : 'Send Evaluation'}
+                        </Button>
+                    </View>
+                    <View>
+                        <SegmentedButtons
+                            value={value}
+                            onValueChange={(newValue)=>onChangeIsnegative(newValue)}
+                            buttons={[
+                                {
+                                    value: 'Negative',
+                                    label: 'Negative',
+                                },
+                                {
+                                    value: 'positive',
+                                    label: 'Positive',
+                                } 
+                            ]}
+                        />
+                    </View>
+                    <View style={styles.activityAllContainer}>
+                        <Text style={styles.activityAllLabel}>Activity:</Text>
+                        <View style={[styles.pickerContainer, { flex: 1 }]}>
+                            <Picker
+                                selectedValue={selectedActivity}
+                                onValueChange={(value) => setSelectedActivity(value as string)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Activity" value="" />
+                                {activities.map((activity, idx) => (
+                                    <Picker.Item
+                                        key={activity.activityid}
+                                        label={activity.activitytype ? activity.activitytype.toString() : activity.activityid.toString()}
+                                        value={activity.activityid.toString()}
                                     />
-                                </View>
-                                <Text style={styles.studentName}>{student.name}</Text>
-                            </View>
+                                ))}
+                            </Picker>
                         </View>
-                    ))}
-                </View>
-            </ScrollView>
+                    </View>
+                    <View style={styles.studentList}>
+                        <Text style={styles.activityAllLabel}>List Students:</Text>
+                        {filteredStudents.map((student) => (
+                            <View key={student.studentid} style={styles.studentItem}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <View style={styles.studentCheckbox}>
+                                        <Checkbox
+                                            status={checkedStudents[student.studentid] ? 'checked' : 'unchecked'}
+                                            onPress={() => handleCheckboxToggle(student.studentid)}
+                                            color={theme.colors.primary}
+                                        />
+                                    </View>
+                                    <Text style={styles.studentName}>{student.name}</Text>
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                </ScrollView>
             )}
         </View>
     )
@@ -232,7 +272,7 @@ function createStyles(theme: any) {
             flex: 1,
             paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE,
             backgroundColor: theme.colors.background,
-            paddingTop:10,
+            paddingTop: 10,
         },
         header: {
             flexDirection: 'row',
@@ -298,7 +338,7 @@ function createStyles(theme: any) {
             width: '100%',
             color: theme.colors.onSurface,
         },
-        activityAllContainer: { 
+        activityAllContainer: {
             marginBottom: 10,
         },
         activityAllLabel: {
@@ -316,7 +356,7 @@ function createStyles(theme: any) {
             borderColor: theme.colors.onSurface,
             borderRadius: 5,
             paddingVertical: 5,
-            paddingHorizontal:10,
+            paddingHorizontal: 10,
             fontSize: 16,
             backgroundColor: theme.colors.surface,
             color: theme.colors.onSurface,

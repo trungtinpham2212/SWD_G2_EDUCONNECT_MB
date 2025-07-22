@@ -10,6 +10,7 @@ import { Feather } from '@expo/vector-icons';
 import { ThemeContext } from '@/context/ThemeContext';
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { MainStackParamList } from "@/types/navigation";
+import { logoutFCMCleanup } from "@/api";
 
 // type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 const DEFAULT_AVATAR = 'https://i.pinimg.com/564x/32/25/b1/3225b1ec8c0064fba95d2d84faa79626.jpg';
@@ -26,6 +27,10 @@ const SettingScreen:FC = () => {
 
     const handleLogout = async () => {
         try {
+            const userId = authState?.user?.userId;
+            if (userId) {
+                await logoutFCMCleanup(userId); 
+              }
             await logout();
         } catch (error) {
             Alert.alert('Error', 'Failed to logout. Please try again.');
