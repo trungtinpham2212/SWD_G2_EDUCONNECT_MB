@@ -25,7 +25,7 @@ axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
     if (error.response?.status === 401) {
-       await handleUnauthorized();
+      //  await handleUnauthorized();
     }
     if (error.response?.status === 404) {
       // Xử lý lỗi 404: Not Found - Đừng log ra nếu không muốn hiển thị

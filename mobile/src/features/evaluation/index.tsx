@@ -60,8 +60,9 @@ const EvaluationScreen: React.FC = () => {
                 }
                 const studentsRes = await teacherService.getStudentsByClassId(payload);
                 if (studentsRes) {
-                    setStudents(studentsRes);
-                    setNumberOfStudents(studentsRes.length);
+                    setStudents([])
+                    setStudents(studentsRes.items);
+                    setNumberOfStudents(studentsRes.items.length);
                 }
             } catch (err) { }
             await fetchActivities(); 

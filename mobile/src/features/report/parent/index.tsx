@@ -6,7 +6,7 @@ import { useTheme } from 'react-native-paper';
 import { SIZES } from '@/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { parentService, Student, PagedStudentReportResponse, Report, StudentFilterRequest, ReportGroupQueryParams } from '@/api';
+import { parentService, Student, PagedStudentReportResponse, Report, ReportGroupQueryParams, StudentQueryParam } from '@/api';
 import { useAuth } from '@/features/auth/context/AuthContext'; 
 import moment from 'moment';
 // import DateRangeSelector from '@/features/report/parent/components/DateRangeSelector';
@@ -148,18 +148,18 @@ const ParentReportScreen: React.FC = () => {
             if (!parentId) return;
             try {
                 setLoadingStudents(true);
-                const payoad : StudentFilterRequest ={
+                const payoad : StudentQueryParam ={
                     parentId,
                     page:1,
                     pageSize: 50
                 }
                 const data = await parentService.getStudentsByParentId(payoad);
-                setStudents(data);
-                if (data.length > 0) {
-                    const firstStudent = data[0];
+                if (data) {
+                    setStudents(data?.items);
+                    const firstStudent = data.items[0];
                     const studentId = Number(firstStudent.studentid);
                     setSelectedStudentId(studentId);
-                    setSelectedName(data[0].name);
+                    setSelectedName(data.items[0].studentName); 
                     setPage(1);
                     setHasMore(true);
                     fetchReportStudent(studentId, 1, false);
@@ -177,7 +177,7 @@ const ParentReportScreen: React.FC = () => {
         const selectedStudent = students.find(s => Number(s.studentid) === studentId);
         if (selectedStudent) {
             setSelectedStudentId(studentId);
-            setSelectedName(selectedStudent.name);
+            setSelectedName(selectedStudent.studentName);
             setPage(1);
             setHasMore(true);
             fetchReportStudent(studentId, 1, false);

@@ -28,8 +28,8 @@ export const teacherApi = {
         });
         return response.data;
     },
-    getStudentsByClassId: async(payload: StudentQueryParam) : Promise<Student[]> => {
-        const response = await axiosInstance.get<Student[]>('/api/students',{
+    getStudentsByClassId: async(payload: StudentQueryParam) : Promise<StudentResponse> => {
+        const response = await axiosInstance.get<StudentResponse>('/api/students',{
             params:{
                 ...payload
             }

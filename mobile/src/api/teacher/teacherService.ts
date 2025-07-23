@@ -29,12 +29,12 @@ export const teacherService = {
             return null;
         }
     },
-    getStudentsByClassId: async(payload: StudentQueryParam) : Promise<Student[]> => {
+    getStudentsByClassId: async(payload: StudentQueryParam) : Promise<StudentResponse | null> => {
         try{
             return await teacherApi.getStudentsByClassId(payload);
         }catch(err){
             console.error("List students get failed: ", err);
-            return [];
+            return null;
         }
     },
     evaluationStudent: async(payload: EvaluationStudentRequest) => {
