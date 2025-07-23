@@ -9,8 +9,7 @@ import { FONTS } from '@/constants/fonts';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { COLORS } from '@/constants/colors';  
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { FcmTokenRequest, FormLoginRequest, authService, createAndSendToken } from '@/api';  
-import { useFCMTokenSync } from '@/features/auth/hooks/useAuthEffect';
+import { FormLoginRequest, authService, createAndSendToken } from '@/api';   
 
 // type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 
 

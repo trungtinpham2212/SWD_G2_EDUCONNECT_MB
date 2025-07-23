@@ -6,10 +6,7 @@ import { handleUnauthorized } from '@/utils/authUtils';
 const axiosInstance: AxiosInstance = axios.create({
   // baseURL: Config.API_BASE_URL,   
   baseURL: 'https://swd-g2-educonnect-be.onrender.com',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  timeout: 10000
 });
 
 axiosInstance.interceptors.request.use(

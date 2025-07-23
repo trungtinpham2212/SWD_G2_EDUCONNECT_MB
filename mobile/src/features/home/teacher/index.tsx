@@ -44,12 +44,12 @@ const TeacherHomeScreen: React.FC = () => {
                     <Text style={[styles.welcomeText, { color: theme.colors.onSurface }]}> 
                         Xin chào, {authState.user?.userName || 'Giáo viên'}
                     </Text>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styles.notificationButton}
                         onPress={() => navigation.navigate('NotificationTest')}
                     >
                         <FontAwesome5 name="bell" size={24} color={theme.colors.primary} />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 {/* Main Content */}
                 <View style={styles.mainContent}>

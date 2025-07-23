@@ -9,7 +9,8 @@ import { Teacher } from "@/api/teacher/teacherTypes";
 
 export type Student = {
     studentid: number;
-    name: string;
+    studentName: string;
+    name?: string;
     dateofbirth: string;
     parentid: number;
     classid: number;
@@ -83,13 +84,7 @@ export type ReportGroup = {
     reportStudents: Report[];
     students: Student[];
 }
-
-export type StudentFilterRequest  = {
-    parentId: number;
-    page: number;
-    pageSize: number;
-}
-
+ 
 export type ChatbotSendRequest ={
     messagetext: string;
     parentId: number;
@@ -121,3 +116,4 @@ export type ChatMessage = {
     createat: string;
 
 }
+ 

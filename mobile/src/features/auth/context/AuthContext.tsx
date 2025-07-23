@@ -12,6 +12,7 @@ interface AuthState {
 
 interface AuthContextType {
   authState: AuthState;
+  setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
   login: (token: string, userData: AuthState['user']) => Promise<void>;
   logout: () => Promise<void>;
   getUserRole: () => UserRole | null;
@@ -91,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ authState, login, logout, getUserRole }}>
+    <AuthContext.Provider value={{ authState,setAuthState, login, logout, getUserRole }}>
       {children}
     </AuthContext.Provider>
   );

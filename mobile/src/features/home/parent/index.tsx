@@ -49,12 +49,12 @@ const ParentHomeScreen: React.FC = () => {
                     <Text style={[styles.welcomeText, { color: theme.colors.onSurface }]}>
                         Hello, {authState.user?.userName || 'User'}
                     </Text>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styles.notificationButton}
                         onPress={() => navigation.navigate('NotificationTest')}
                     >
                         <FontAwesome5 name="bell" size={24} color={theme.colors.onSurface} />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 {/* Main Content */}
                 <ScrollView scrollEnabled={true} showsVerticalScrollIndicator={false}>

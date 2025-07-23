@@ -17,7 +17,7 @@ export type Teacher = {
 }
 
 export type Period = {
-    periodid: number | null,
+    periodid: number,
     subjectid: number | null,
     periodno: number,
     classid: number,
@@ -62,11 +62,11 @@ export type StudentToEvaluation = {
 }
 
 
-export type StudentByClassIdRequest = {
-    classId: number;
-    page: number;
-    pageSize: number;
-}
+// export type StudentByClassIdRequest = {
+//     classId: number;
+//     page: number;
+//     pageSize: number;
+// }
 
 export type ReportStudentResponse = {
     items: Report[];
@@ -83,10 +83,3 @@ export type AICreateReportGroupRequest = {
     endDate: string;
 } 
 
-export type StudentResponse = {
-    items: Student[];
-    totalCount: number;
-    pageNumber: number;
-    pageSize: number;
-    totalPages: number;
-}

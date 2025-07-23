@@ -1,6 +1,6 @@
 import axiosInstance from "@/api/axiosConfig";
-import { ScheduleTeacherQueryRequest, Period, Activity, PeriodResponse,EvaluationStudentRequest,StudentByClassIdRequest,ReportStudentResponse, ActivitiesResponse, AICreateReportGroupRequest, StudentResponse } from "@/api/teacher/teacherTypes";
-import {ReportStudentQueryParam, ReportGroupQueryParams, StudentQueryParam, ActivityQueryParam} from '@/api/shared/filterTypes';
+import { ScheduleTeacherQueryRequest, PeriodResponse,EvaluationStudentRequest,ReportStudentResponse, ActivitiesResponse, AICreateReportGroupRequest } from "@/api/teacher/teacherTypes";
+import {ReportStudentQueryParam, ReportGroupQueryParams, StudentQueryParam, ActivityQueryParam, StudentResponse} from '@/api/shared/filterTypes';
 import { Student, PagedStudentReportResponse, ReportGroup } from "@/api/parent/parentTypes";
 
 export const teacherApi = {

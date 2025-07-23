@@ -242,7 +242,7 @@ const CreateReportScreen: React.FC = () => {
       <Card.Content>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flex: 1 }}>
-            <Text variant="bodyLarge">{item.name}</Text>
+            <Text variant="bodyLarge">{item.studentName}</Text>
             {item.class?.classname && (
               <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 2 }}>
                 Class: {item.class?.classname}

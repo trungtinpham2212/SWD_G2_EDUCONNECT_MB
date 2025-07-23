@@ -1,23 +1,23 @@
-import { Student, PagedStudentReportResponse, TeachersOfStudentResponse, StudentFilterRequest, ChatbotResponse, ChatbotSendRequest } from '@/api/parent/parentTypes';
+import { Student, PagedStudentReportResponse, TeachersOfStudentResponse, ChatbotResponse, ChatbotSendRequest } from '@/api/parent/parentTypes';
 import { PeriodResponse } from "@/api/teacher/teacherTypes";
 import { parentApi } from '@/api/parent/parentApi';
-import { PeriodQueryparam, ReportGroupQueryParams, StudentQueryParam, TeacherQueryParam } from "@/api/shared/filterTypes";
+import { PeriodQueryparam, ReportGroupQueryParams, StudentQueryParam, TeacherQueryParam, StudentResponse } from "@/api/shared/filterTypes";
 
 
 export const parentService = {
-    getStudentsByParentId: async (payload: StudentQueryParam): Promise<Student[]> => {
+    getStudentsByParentId: async (payload: StudentQueryParam): Promise<StudentResponse | null> => {
         try {
             return await parentApi.getStudentsByParentId(payload);
         } catch (err) {
             console.error("Students get failed:", err);
-            return [];
+            return null;
         }
     },
     getStudentSchedule: async (payload: PeriodQueryparam): Promise<PeriodResponse | null> => {
         try {
             return await parentApi.getStudentSchedule(payload);
         } catch (err) {
-            console.error("Shedules get failed:", err);
+            console.error("Schedules get failed:", err);
             return null;
         }
     },

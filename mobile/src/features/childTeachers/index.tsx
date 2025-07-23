@@ -1,4 +1,4 @@
-import { parentService, Student, StudentFilterRequest, Teacher, TeacherQueryParam } from "@/api";
+import { parentService, Student, StudentQueryParam, Teacher, TeacherQueryParam } from "@/api";
 import { COLORS, SIZES } from "@/constants";
 import MainLayout from "@/layouts/MainLayout";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,7 +13,7 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 const ChildTeachersScreen: React.FC = () => {
     const theme = useTheme();
     const navigation = useNavigation();
-    
+
     const [students, setStudents] = useState<Student[]>([]);
     const [selectedName, setSelectedName] = useState<string>('');
     const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
@@ -29,23 +29,23 @@ const ChildTeachersScreen: React.FC = () => {
     const [initialLoading, setInitialLoading] = useState(true);
     const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
- 
-    
+
+
     const { authState } = useAuth();
     const parentId = authState.user?.userId;
 
-    const fetchTeacherOfStudent = async(classId : number, nextPage = 1, append = false ) => {
+    const fetchTeacherOfStudent = async (classId: number, nextPage = 1, append = false) => {
         if (!append && nextPage === 1) setLoading(true);
-        try{
+        try {
             const payload: TeacherQueryParam = {
                 classId,
-                start: '2024-11-01',
-                end: '2025-03-01',
+                start: '2024-09-01',
+                end: '2025-07-01',
                 page: nextPage,
                 pageSize,
             };
             const response = await parentService.getTeachersOfStudent(payload);
-            if(response){
+            if (response) {
                 setHasMore(response.pageNumber < response.totalPages);
                 if (append) {
                     setListTeacher(prev => [...prev, ...response.items]);
@@ -55,7 +55,7 @@ const ChildTeachersScreen: React.FC = () => {
                 setPage(response.pageNumber);
             }
 
-        }catch(error){
+        } catch (error) {
             console.error('Error fetching teachers:', error);
         } finally {
             if (!append && nextPage === 1) {
@@ -70,19 +70,22 @@ const ChildTeachersScreen: React.FC = () => {
             if (!parentId) return;
             try {
                 setLoadingStudents(true);
-                const payload : StudentFilterRequest = {
+                const payload: StudentQueryParam = {
                     parentId,
                     page: 1,
                     pageSize: 50
                 }
-                const data = await parentService.getStudentsByParentId(payload);
-                setStudents(data);
-                if (data.length > 0) {
-                    const firstStudent = data[0];
-                    const classId = Number(firstStudent.classid);
-                    setSelectedClassId(classId);
-                    setSelectedName(data[0].name);
-                    await fetchTeacherOfStudent(classId, 1, false);
+                const response = await parentService.getStudentsByParentId(payload);
+                if (response) { 
+                    setStudents(response.items);
+                    if (response.items.length > 0) {
+                        const firstStudent = response.items[0];
+                        const classId = Number(firstStudent.class?.classid);
+                        setSelectedClassId(classId);
+                        console.log(firstStudent.class?.classid)
+                        setSelectedName(response.items[0].studentName);
+                        await fetchTeacherOfStudent(classId, 1, false);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching students:', error);
@@ -95,15 +98,16 @@ const ChildTeachersScreen: React.FC = () => {
     }, [parentId]);
 
     const handleStudentChange = async (studentId: number) => {
+        console.log("studentId",studentId)
         
         const selectedStudent = students.find(s => Number(s.studentid) === studentId);
-        if(selectedStudent){
-            setSelectedClassId(selectedStudent.classid);
-            setSelectedName(selectedStudent.name);
+        if (selectedStudent?.class?.classid) {
+            setSelectedClassId(selectedStudent.class?.classid); 
+            setSelectedName(selectedStudent.studentName);
             setPage(1);
             setHasMore(true);
-            await fetchTeacherOfStudent(selectedStudent.classid, 1, false);
-        }  
+            await fetchTeacherOfStudent(selectedStudent.class?.classid, 1, false);
+        }
     };
 
     const handleLoadMore = () => {
@@ -213,7 +217,7 @@ const ChildTeachersScreen: React.FC = () => {
 
         },
         cardContentItem: {
-            flexDirection: 'row', 
+            flexDirection: 'row',
             alignItems: 'center',
             gap: 10,
             paddingVertical: 2,
@@ -307,9 +311,9 @@ const ChildTeachersScreen: React.FC = () => {
         },
     }), [theme]);
 
-    return ( 
-            <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-                {/* <View style={[styles.header, { borderBottomColor: theme.colors.outline }]}>
+    return (
+        <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+            {/* <View style={[styles.header, { borderBottomColor: theme.colors.outline }]}>
                     <TouchableOpacity
                         style={styles.headerButton}
                         onPress={() => navigation.goBack()}
@@ -320,151 +324,151 @@ const ChildTeachersScreen: React.FC = () => {
                     <Text style={[styles.headerTitle, { color: theme.colors.onSurface }]}>Teacher Information</Text>
 
                 </View> */}
-                <View style={styles.mainContent}>
-                    <View style={styles.dropdownRow}>
-                        <Picker
-                            selectedValue={selectedName}
-                            onValueChange={(value) => handleStudentChange(Number(value))}
-                            style={{
-                                color: theme.colors.onSurface,
-                                backgroundColor: theme.colors.background,
-                            }}
-                            dropdownIconColor={theme.colors.primary}
-                            itemStyle={{ color: theme.colors.onSurface }}
-                            enabled={!loadingStudents}
-                        >
-                            {loadingStudents ? (
-                                <Picker.Item label="Loading students..." value="" />
-                            ) : students.length === 0 ? (
-                                <Picker.Item label="No students available" value="" />
-                            ) : (
-                                students.map((student) => (
-                                    <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
-                                ))
-                            )}
-                        </Picker>
-                        {loadingStudents && (
-                            <View style={styles.pickerLoadingContainer}>
-                                <ActivityIndicator size="small" color={theme.colors.primary} />
-                            </View>
-                        )}
-                    </View>
-                    
-                    {/* Loading indicator when fetching teachers */}
-                    {initialLoading ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={theme.colors.primary} />
-                        </View>
-                    ) : loading ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={theme.colors.primary} />
-                        </View>
-                    ) : listTeacher.length === 0 ? (
-                        <View style={styles.noDataContainer}>
-                            <Text style={styles.noDataText}>Không có giáo viên nào</Text>
-                        </View>
-                    ) : (
-                        <FlatList
-                            data={listTeacher}
-                            keyExtractor={(item) => item.teacherId?.toString() || Math.random().toString()}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity 
-                                    style={styles.card}
-                                    onPress={() => handleTeacherPress(item)}
-                                    activeOpacity={0.7}
-                                >
-                                    <View style={styles.cardHeader}>
-                                        <Image 
-                                            source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} 
-                                            style={styles.cardImage} 
-                                        />
-                                        <View style={{ flex: 1 }}>
-                                            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.cardName}>
-                                                {item.fullName || 'Unknown Teacher'}
-                                            </Text>
-                                            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.cardSubject}>
-                                                {item.subjectName || 'Unknown Subject'}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                    <View style={styles.cardContent}>
-                                        <View style={styles.cardContentItem}>
-                                            <Text style={styles.cardContentItemTextLeft}>Phone:</Text>
-                                            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.cardContentItemTextRight}>
-                                                {item.phoneNumber || 'N/A'}
-                                            </Text>
-                                        </View>
-                                        <View style={styles.cardContentItem}>
-                                            <Text style={styles.cardContentItemTextLeft}>Email:</Text>
-                                            <Text numberOfLines={1} ellipsizeMode="tail" style={[styles.cardContentItemTextRight]}>
-                                                {item.email || 'N/A'}   
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </TouchableOpacity>
-                            )}
-                            onEndReached={handleLoadMore}
-                            onEndReachedThreshold={0.2}
-                            ListFooterComponent={loadingMore ? (
-                                <View style={styles.loadingContainer}>
-                                    <Text style={{ color: theme.colors.primary, margin: 10 }}>Đang tải thêm...</Text>
-                                </View>
-                            ) : null}
-                            refreshing={refreshing}
-                            onRefresh={handleRefresh}
-                            showsVerticalScrollIndicator={true}
-                            style={{ flex: 1 }}
-                            contentContainerStyle={styles.flatListContainer}
-                        />
-                    )}
-
-                    {/* Teacher Detail Modal */}
-                    <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={closeModal}
+            <View style={styles.mainContent}>
+                <View style={styles.dropdownRow}>
+                    <Picker
+                        selectedValue={selectedName}
+                        onValueChange={(value) => handleStudentChange(Number(value))}
+                        style={{
+                            color: theme.colors.onSurface,
+                            backgroundColor: theme.colors.background,
+                        }}
+                        dropdownIconColor={theme.colors.primary}
+                        itemStyle={{ color: theme.colors.onSurface }}
+                        enabled={!loadingStudents}
                     >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContent}>
-                                <View style={styles.modalHeader}>
-                                    <Image 
-                                        source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} 
-                                        style={styles.modalImage} 
+                        {loadingStudents ? (
+                            <Picker.Item label="Loading students..." value="" />
+                        ) : students.length === 0 ? (
+                            <Picker.Item label="No students available" value="" />
+                        ) : (
+                            students.map((student) => (
+                                <Picker.Item key={student.studentid} label={student.studentName} value={student.studentid} />
+                            ))
+                        )}
+                    </Picker>
+                    {loadingStudents && (
+                        <View style={styles.pickerLoadingContainer}>
+                            <ActivityIndicator size="small" color={theme.colors.primary} />
+                        </View>
+                    )}
+                </View>
+
+                {/* Loading indicator when fetching teachers */}
+                {initialLoading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                    </View>
+                ) : loading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                    </View>
+                ) : listTeacher.length === 0 ? (
+                    <View style={styles.noDataContainer}>
+                        <Text style={styles.noDataText}>Không có giáo viên nào</Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={listTeacher}
+                        keyExtractor={(item) => item.teacherId?.toString() || Math.random().toString()}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                style={styles.card}
+                                onPress={() => handleTeacherPress(item)}
+                                activeOpacity={0.7}
+                            >
+                                <View style={styles.cardHeader}>
+                                    <Image
+                                        source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }}
+                                        style={styles.cardImage}
                                     />
-                                    <Text style={styles.modalTitle}>
-                                        {selectedTeacher?.fullName || 'Unknown Teacher'}
-                                    </Text>
-                                    <TouchableOpacity onPress={closeModal} style={styles.modalCloseButton}>
-                                        <Ionicons name="close" size={24} color={theme.colors.onSurface} />
-                                    </TouchableOpacity>
+                                    <View style={{ flex: 1 }}>
+                                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.cardName}>
+                                            {item.fullName || 'Unknown Teacher'}
+                                        </Text>
+                                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.cardSubject}>
+                                            {item.subjectName || 'Unknown Subject'}
+                                        </Text>
+                                    </View>
                                 </View>
-
-                                <View style={styles.modalInfoItem}>
-                                    <Text style={styles.modalInfoLabel}>Subject:</Text>
-                                    <Text style={styles.modalInfoValue}>
-                                        {selectedTeacher?.subjectName || 'N/A'}
-                                    </Text>
+                                <View style={styles.cardContent}>
+                                    <View style={styles.cardContentItem}>
+                                        <Text style={styles.cardContentItemTextLeft}>Phone:</Text>
+                                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.cardContentItemTextRight}>
+                                            {item.phoneNumber || 'N/A'}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cardContentItem}>
+                                        <Text style={styles.cardContentItemTextLeft}>Email:</Text>
+                                        <Text numberOfLines={1} ellipsizeMode="tail" style={[styles.cardContentItemTextRight]}>
+                                            {item.email || 'N/A'}
+                                        </Text>
+                                    </View>
                                 </View>
+                            </TouchableOpacity>
+                        )}
+                        onEndReached={handleLoadMore}
+                        onEndReachedThreshold={0.2}
+                        ListFooterComponent={loadingMore ? (
+                            <View style={styles.loadingContainer}>
+                                <Text style={{ color: theme.colors.primary, margin: 10 }}>Đang tải thêm...</Text>
+                            </View>
+                        ) : null}
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        showsVerticalScrollIndicator={true}
+                        style={{ flex: 1 }}
+                        contentContainerStyle={styles.flatListContainer}
+                    />
+                )}
 
-                                <View style={styles.modalInfoItem}>
-                                    <Text style={styles.modalInfoLabel}>Phone:</Text>
-                                    <Text style={styles.modalInfoValue}>
-                                        {selectedTeacher?.phoneNumber || 'N/A'}
-                                    </Text>
-                                </View>
+                {/* Teacher Detail Modal */}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={closeModal}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Image
+                                    source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }}
+                                    style={styles.modalImage}
+                                />
+                                <Text style={styles.modalTitle}>
+                                    {selectedTeacher?.fullName || 'Unknown Teacher'}
+                                </Text>
+                                <TouchableOpacity onPress={closeModal} style={styles.modalCloseButton}>
+                                    <Ionicons name="close" size={24} color={theme.colors.onSurface} />
+                                </TouchableOpacity>
+                            </View>
 
-                                <View style={styles.modalInfoItem}>
-                                    <Text style={styles.modalInfoLabel}>Email:</Text>
-                                    <Text style={styles.modalInfoValue}>
-                                        {selectedTeacher?.email || 'N/A'}
-                                    </Text>
-                                </View> 
+                            <View style={styles.modalInfoItem}>
+                                <Text style={styles.modalInfoLabel}>Subject:</Text>
+                                <Text style={styles.modalInfoValue}>
+                                    {selectedTeacher?.subjectName || 'N/A'}
+                                </Text>
+                            </View>
+
+                            <View style={styles.modalInfoItem}>
+                                <Text style={styles.modalInfoLabel}>Phone:</Text>
+                                <Text style={styles.modalInfoValue}>
+                                    {selectedTeacher?.phoneNumber || 'N/A'}
+                                </Text>
+                            </View>
+
+                            <View style={styles.modalInfoItem}>
+                                <Text style={styles.modalInfoLabel}>Email:</Text>
+                                <Text style={styles.modalInfoValue}>
+                                    {selectedTeacher?.email || 'N/A'}
+                                </Text>
                             </View>
                         </View>
-                    </Modal>
-                </View>
-            </View> 
+                    </View>
+                </Modal>
+            </View>
+        </View>
     )
 }
 

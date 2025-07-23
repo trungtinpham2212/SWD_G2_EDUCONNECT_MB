@@ -41,7 +41,7 @@ const SettingScreen:FC = () => {
         handleLogout();
         hideDialog();
     };
-    const img = authState.user?.avatarURL || DEFAULT_AVATAR;
+    const img = authState.user?.avatarURL  || DEFAULT_AVATAR;
     return (
         <MainLayout>
             <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>

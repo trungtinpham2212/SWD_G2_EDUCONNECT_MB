@@ -1,3 +1,4 @@
+import { Asset } from 'react-native-image-picker';
 
 export type FormLoginRequest = {
   username: string;
@@ -66,4 +67,23 @@ export type UserInfor = {
   avatarUrl: string | null;
   teacher: TeacherInfor | null;
   students: Student[] | null;
+}
+
+export type UpdateProfilePayload = {
+  userId: number;
+  fullname: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  avatarUri?: string; 
+}
+
+export type UpdateProfileResponse = {
+  message: string;
+  user: {
+    userId: number;
+    fullname: string;
+    email: string;
+    avatarUrl: string;
+  }
 }

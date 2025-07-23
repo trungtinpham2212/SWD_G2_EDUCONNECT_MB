@@ -7,13 +7,13 @@ import { Picker } from '@react-native-picker/picker';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { Period, Student, parentService,StudentFilterRequest, StudentQueryParam, PeriodQueryparam } from '@/api';
+import { Period, Student, parentService, StudentQueryParam, PeriodQueryparam } from '@/api';
 
 const { width } = Dimensions.get('window');
 
 const ParentScheduleScreen: FC = () => {
     const theme = useTheme();
-    // const [currentDate] = useState(moment());
+    
     const [selectedDate, setSelectedDate] = useState(moment());
     const [currentWeek, setCurrentWeek] = useState(moment().startOf('week'));
 
@@ -58,7 +58,7 @@ const ParentScheduleScreen: FC = () => {
         setCurrentWeek(newWeek);
         // Reset selected date to first day of new week
         setSelectedDate(newWeek);
-    }; 
+    };
 
     const renderDayItem = ({ item, index }: { item: any, index: number }) => (
         <TouchableOpacity
@@ -91,15 +91,16 @@ const ParentScheduleScreen: FC = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const payload: PeriodQueryparam = {
                 date,
                 classId: classId,
                 page: 1,
-                pageSize:30,
-            }; 
+                pageSize: 30,
+            };
             const schedule = await parentService.getStudentSchedule(payload);
-            if(schedule){
+            if (schedule) {
+                setSchedule([])
                 setSchedule(schedule.items);
             }
         } catch (error) {
@@ -117,20 +118,22 @@ const ParentScheduleScreen: FC = () => {
             if (!parentId) return;
             try {
                 setLoadingStudents(true);
-                const payload: StudentQueryParam={
+                const payload: StudentQueryParam = {
                     parentId,
-                    page:1,
+                    page: 1,
                     pageSize: 30
                 }
-                const data = await parentService.getStudentsByParentId(payload);
-                setStudents(data);
-                if (data.length > 0) {
-                    const firstStudent = data[0];
-                    const classId = Number(firstStudent.classid);
-                    setSelectedClassId(classId);
-                    setSelectedName(data[0].name);
+                const response = await parentService.getStudentsByParentId(payload);
+                if (response) {
+                    setStudents(response.items);
+                    if (response.items.length > 0) {
+                        const firstStudent = response.items[0];
+                        const classId = Number(firstStudent.class?.classid);
+                        setSelectedClassId(classId);
+                        setSelectedName(response.items[0].studentName);
 
-                    await fetchScheduleForClass(classId, selectedDate.format('YYYY-MM-DD'));
+                        await fetchScheduleForClass(classId, selectedDate.format('YYYY-MM-DD'));
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching students:', error);
@@ -143,13 +146,13 @@ const ParentScheduleScreen: FC = () => {
     }, [parentId]);
 
     const handleStudentChange = async (studentId: number) => {
-        
+
         const selectedStudent = students.find(s => Number(s.studentid) === studentId);
-        if(selectedStudent){
+        if (selectedStudent) {
             setSelectedClassId(selectedStudent.classid);
-            setSelectedName(selectedStudent.name);
+            setSelectedName(selectedStudent.studentName);
             await fetchScheduleForClass(selectedStudent.classid, selectedDate.format('YYYY-MM-DD'));
-        }  
+        }
     };
 
     useEffect(() => {
@@ -158,6 +161,34 @@ const ParentScheduleScreen: FC = () => {
         }
     }, [selectedDate]);
 
+
+
+    const RenderScheduleItem = memo(({ item }: { item: Period }) => {
+        const formatTime = (periodDate: string) => {
+            if (!periodDate) return 'N/A';
+            const startTime = moment(periodDate).format('HH:mm');
+            const endTime = moment(periodDate).add(45, 'minutes').format('HH:mm');
+            return `${startTime} - ${endTime}`;
+        };
+        return (
+            <TouchableOpacity>
+                <View style={styles.scheduleItem}>
+                    <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={[styles.periodText, { color: theme.colors.onSurface }]}>
+                            {item.periodno}
+                        </Text>
+                        <Text style={[styles.timeText, { color: theme.colors.primary }]}>
+                            {formatTime(item.perioddate)}
+                        </Text>
+                    </View>
+                    <View style={{ width: '60%' }}>
+                        <Text style={styles.subjectText}>{item.subjectName}</Text>
+                        <Text style={styles.subjectTextSecondary}>{item.teacherName}</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        )
+    });
     const styles = useMemo(() => StyleSheet.create({
         container: {
             flex: 1,
@@ -349,7 +380,7 @@ const ParentScheduleScreen: FC = () => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            paddingVertical: 10, 
+            paddingVertical: 10,
         },
         navButton: {
             height: 50,
@@ -365,7 +396,7 @@ const ParentScheduleScreen: FC = () => {
             shadowOpacity: 0.1,
             shadowRadius: 3,
             elevation: 3,
-            paddingHorizontal:20,
+            paddingHorizontal: 20,
         },
         navButtonText: {
             fontSize: 20,
@@ -396,33 +427,6 @@ const ParentScheduleScreen: FC = () => {
             height: 300
         },
     }), [theme]);
-
-    const RenderScheduleItem = memo(({ item }: { item: Period }) => {
-        const formatTime = (periodDate: string) => {
-            if (!periodDate) return 'N/A';
-            const startTime = moment(periodDate).format('HH:mm');
-            const endTime = moment(periodDate).add(45, 'minutes').format('HH:mm');
-            return `${startTime} - ${endTime}`;
-        };
-        return (
-            <TouchableOpacity>
-                <View style={styles.scheduleItem}>
-                    <View style={{ width: '40%', justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={[styles.periodText, { color: theme.colors.onSurface }]}>
-                            {item.periodno}
-                        </Text>
-                        <Text style={[styles.timeText, { color: theme.colors.primary }]}>
-                            {formatTime(item.perioddate)}
-                        </Text>
-                    </View>
-                    <View style={{ width: '60%' }}>
-                        <Text style={styles.subjectText}>{item.subjectName}</Text>
-                        <Text style={styles.subjectTextSecondary}>{item.teacherName}</Text>
-                    </View>
-                </View>
-            </TouchableOpacity>
-        )
-    });
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
@@ -457,7 +461,7 @@ const ParentScheduleScreen: FC = () => {
                                 <Picker.Item label="No students available" value="" />
                             ) : (
                                 students.map((student) => (
-                                    <Picker.Item key={student.studentid} label={student.name} value={student.studentid} />
+                                    <Picker.Item key={student.studentid} label={student.studentName} value={student.studentid} />
                                 ))
                             )}
                         </Picker>
@@ -512,8 +516,8 @@ const ParentScheduleScreen: FC = () => {
                             contentContainerStyle={styles.weekContainer}
                             snapToInterval={width * 0.25}
                             ItemSeparatorComponent={() => <TouchableOpacity style={{ width: 10 }} />}
-                            ListHeaderComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE}} />}
-                            ListFooterComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE }} />} 
+                            ListHeaderComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE }} />}
+                            ListFooterComponent={<View style={{ width: SIZES.DISTANCE_MAIN_POSITIVE }} />}
                         />
 
 

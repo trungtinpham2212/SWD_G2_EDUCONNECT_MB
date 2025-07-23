@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, FlatList, StyleSheet, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Checkbox, ActivityIndicator, useTheme, Button, TextInput, HelperText, Card, Text } from 'react-native-paper';
-import { Student, teacherService, Report,ReportGroupQueryParams } from "@/api";
+import { Student, teacherService, Report, ReportGroupQueryParams } from "@/api";
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { COLORS, SIZES } from '@/constants';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -24,19 +24,27 @@ const TeacherReportScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [initialReportLoading, setInitialReportLoading] = useState(true);
   const navigation: NavigationProp<MainStackParamList> = useNavigation();
- 
+  const debouncedTitle = useDebounce(title, 500);
+
   const { authState } = useAuth();
   const teacherId = authState.user?.teacherId!;
 
-  const fetchReportStudent = async (nextPage = 1, append = false) => {
+  const fetchReportStudent = async (
+    nextPage = 1,
+    append = false,
+    searchTitle = ''
+  ) => {
     if (!append && nextPage === 1) setLoading(true);
     try {
       const payload: ReportGroupQueryParams = {
         teacherId,
+        title: searchTitle, // Thêm title vào payload
         page: nextPage,
-        pageSize
+        pageSize,
       };
+
       const response = await teacherService.getStudentReporstByTeacherId(payload);
+
       if (response) {
         setHasMore(response.pageNumber < response.totalPages);
         if (append) {
@@ -47,44 +55,46 @@ const TeacherReportScreen: React.FC = () => {
         setPage(response.pageNumber);
       }
     } catch (err) {
-
+      console.error('Error fetching report:', err);
     } finally {
       if (!append && nextPage === 1) {
         setLoading(false);
         setInitialReportLoading(false);
       }
     }
-
   };
+
 
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
       setLoadingMore(true);
-      fetchReportStudent(page + 1, true).finally(() => setLoadingMore(false));
+      fetchReportStudent(page + 1, true, debouncedTitle) // thêm debouncedTitle ở đây
+        .finally(() => setLoadingMore(false));
     }
   };
 
   const handleRefresh = async () => {
-    if (loading || initialReportLoading || !teacherId) return; // Không cho phép refresh khi đang loading
+    if (loading || initialReportLoading || !teacherId) return;
     setRefreshing(true);
     setPage(1);
     setHasMore(true);
-    setListReport([]); // Clear list trước khi fetch mới
+    setListReport([]);
     try {
-      await fetchReportStudent(1, false);
+      await fetchReportStudent(1, false, debouncedTitle); // thêm debouncedTitle ở đây
     } catch (err) {
       Alert.alert('Lỗi', 'Không thể làm mới danh sách báo cáo. Vui lòng thử lại.');
     } finally {
       setRefreshing(false);
     }
-  }; 
+  };
+
 
   useEffect(() => {
     if (!teacherId) return;
     setPage(1);
     setHasMore(true);
-    fetchReportStudent(1, false);
-  }, [teacherId]);
+    fetchReportStudent(1, false, debouncedTitle);
+  }, [debouncedTitle, teacherId]);
 
 
   return (
@@ -110,6 +120,7 @@ const TeacherReportScreen: React.FC = () => {
             autoCapitalize="none"
             style={{ marginBottom: 14 }}
           />
+
           <FlatList
             data={listReport}
             keyExtractor={item => item.reportgroupid.toString()}
@@ -189,6 +200,20 @@ const getStatusColor = (status: string) => {
       return 'black';
   }
 };
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 const styles = StyleSheet.create({
   container: { paddingHorizontal: SIZES.DISTANCE_MAIN_POSITIVE, flex: 1, paddingTop: 10 },

@@ -1,7 +1,7 @@
-import { ScheduleTeacherQueryRequest, Period, PeriodResponse, Activity, EvaluationStudentRequest, StudentByClassIdRequest, ReportStudentResponse, ActivitiesResponse, AICreateReportGroupRequest, StudentResponse } from "@/api/teacher/teacherTypes";
+import { ScheduleTeacherQueryRequest, Period, PeriodResponse, Activity, EvaluationStudentRequest, ReportStudentResponse, ActivitiesResponse, AICreateReportGroupRequest } from "@/api/teacher/teacherTypes";
 import {teacherApi} from '@/api/teacher/teacherApi';
 import { Student, PagedStudentReportResponse, ReportGroup } from "@/api/parent/parentTypes";
-import {ReportStudentQueryParam, ReportGroupQueryParams, StudentQueryParam, ActivityQueryParam} from '@/api/shared/filterTypes';
+import {ReportStudentQueryParam, ReportGroupQueryParams, StudentQueryParam, ActivityQueryParam, StudentResponse} from '@/api/shared/filterTypes';
 
 export const teacherService = {
     scheule: async(payload:ScheduleTeacherQueryRequest) : Promise<PeriodResponse | null> =>  {

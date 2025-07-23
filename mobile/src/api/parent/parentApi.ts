@@ -1,10 +1,10 @@
 import axiosInstance from "@/api/axiosConfig";
-import {Student, PagedStudentReportResponse, TeachersOfStudentResponse, StudentFilterRequest, ChatbotSendRequest, ChatbotResponse} from '@/api/parent/parentTypes';
+import {PagedStudentReportResponse, TeachersOfStudentResponse, ChatbotSendRequest, ChatbotResponse} from '@/api/parent/parentTypes';
 import { PeriodResponse } from "@/api/teacher/teacherTypes";
-import { PeriodQueryparam, ReportGroupQueryParams, StudentQueryParam, TeacherQueryParam } from "@/api/shared/filterTypes";
+import { PeriodQueryparam, ReportGroupQueryParams, StudentQueryParam, TeacherQueryParam,StudentResponse } from "@/api/shared/filterTypes";
 export const parentApi = {
-    getStudentsByParentId : async(payload:StudentQueryParam) : Promise<Student[]> =>{
-        const response = await axiosInstance.get<Student[]>('/api/students',{
+    getStudentsByParentId : async(payload:StudentQueryParam) : Promise<StudentResponse> =>{
+        const response = await axiosInstance.get<StudentResponse>('/api/students',{
             params: {
                 ...payload
             }

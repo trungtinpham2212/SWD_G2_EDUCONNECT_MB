@@ -145,7 +145,7 @@ const EvaluationScreen: React.FC = () => {
     function normalize(str: string) {
         return str.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
     }
-    const filteredStudents = students.filter((student) => normalize(student.name).includes(normalize(searchText)));
+    const filteredStudents = students.filter((student) => normalize(student.studentName).includes(normalize(searchText)));
 
     return (
         <View style={styles.container}>
@@ -255,7 +255,7 @@ const EvaluationScreen: React.FC = () => {
                                             color={theme.colors.primary}
                                         />
                                     </View>
-                                    <Text style={styles.studentName}>{student.name}</Text>
+                                    <Text style={styles.studentName}>{student.studentName}</Text>
                                 </View>
                             </View>
                         ))}

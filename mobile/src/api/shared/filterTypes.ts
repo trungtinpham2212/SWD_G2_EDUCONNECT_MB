@@ -1,3 +1,4 @@
+import { Student } from "@/api/parent/parentTypes";
 
 export type PaginationParams = {
     page: number;
@@ -39,4 +40,12 @@ export type ActivityQueryParam = PaginationParams & {
 export type PeriodQueryparam = PaginationParams & {
     date?: string;
     classId?: number;
+}
+
+export type StudentResponse = {
+    items: Student[];
+    totalCount: number;
+    pageNumber: number;
+    pageSize: number;
+    totalPages: number;
 }

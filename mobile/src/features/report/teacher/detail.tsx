@@ -143,11 +143,11 @@ const DetailReportScreen: React.FC = () => {
                 <Card.Content>
                     <View style={styles.rowItem}>
                         <Text variant="bodySmall" style={styles.leftTitle}>
-                            NO.
+                            ID Student
                         </Text>
                         <View style={styles.rightInfor}>
                             <Text variant="bodySmall" style={styles.textRightInfor}>
-                                : 1
+                                : {item.studentid}
                             </Text>
                         </View>
                     </View>
@@ -157,7 +157,7 @@ const DetailReportScreen: React.FC = () => {
                         </Text>
                         <View style={styles.rightInfor}>
                             <Text variant="bodySmall" style={styles.textRightInfor}>
-                                : {item.student?.name}
+                                : {item.student?.studentName || item.student?.name}
                             </Text>
                         </View>
                     </View>
@@ -205,14 +205,14 @@ const DetailReportScreen: React.FC = () => {
                 renderItem={({ item }) => <CardItemReportStudent item={item} />}
                 ListHeaderComponent={
                     <View>
-                        <Button
+                        {/* <Button
                             mode="contained"
                             style={styles.buttonUpdate}
                             contentStyle={styles.buttonContentUpdate}
                             labelStyle={{ color: '#fff', fontSize: 14 }}
                         >
                             Edit report
-                        </Button>
+                        </Button> */}
                         <View style={styles.containContentReportGroup}>
                             <Text variant="titleSmall" style={{ fontSize: 15 }}> 
                                 {reportGroup && renderProcessedContent(reportGroup.content, studentNames)} 

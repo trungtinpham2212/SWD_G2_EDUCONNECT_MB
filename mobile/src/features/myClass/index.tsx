@@ -203,7 +203,7 @@ const RenderItemStudent = memo(({ item }: { item: Student }) => {
                 <View style={styles.cardHeader}>
                     <Image source={{ uri: 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-875.jpg?semt=ais_hybrid&w=740' }} style={styles.cardImage} />
                     <View>
-                        <Text style={[styles.cardName, { color: theme.colors.primary }]}>{item.name}</Text>
+                        <Text style={[styles.cardName, { color: theme.colors.primary }]}>{item.studentName}</Text>
                         <Text style={[styles.cardSubject, { color: theme.colors.onBackground }]}>{item.dateofbirth.split('T')[0]}</Text>
                     </View>
                 </View>

@@ -1,11 +1,12 @@
 import MainLayout from '@/layouts/MainLayout';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { TextInput } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse, MediaType, ImageLibraryOptions } from 'react-native-image-picker';
 import { UserInfor, authService } from '@/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTheme } from 'react-native-paper';
+import { getUserData, storeUserData } from '@/features/auth/storage/authStorage';
 
 interface EditProfileProps {
     navigation: any;
@@ -21,11 +22,16 @@ const DEFAULT_AVATAR = 'https://i.pinimg.com/564x/32/25/b1/3225b1ec8c0064fba95d2
 const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) => {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
-    const { authState } = useAuth();
+    const { authState, setAuthState } = useAuth();
     const userId = authState.user?.userId!;
     const [userInfor, setUserInfor] = useState<UserInfor | null>(null);
     const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
     const theme = useTheme();
+
+    const [fullname, setFullname] = useState('');
+    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [address, setAddress] = useState('');
 
     const fetchUserAsync = async () => {
         if (!userId) return;
@@ -33,8 +39,12 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
         try {
             const response = await authService.getUserById(userId);
             if (response) {
-                setUserInfor(response); 
-            } 
+                setUserInfor(response);
+                setFullname(response.fullname ?? '');
+                setEmail(response.email ?? '');
+                setPhoneNumber(response.phonenumber ?? '');
+                setAddress(response.address ?? '');
+            }
         } catch (err) {
             setLoading(false);
 
@@ -47,7 +57,7 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
 
 
     useEffect(() => {
-         fetchUserAsync();
+        fetchUserAsync();
     }, [userId]);
 
 
@@ -98,23 +108,40 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
 
         try {
             setSaving(true);
-
-            // Simulate API call
-            // await updateUserProfile(profile);
-
-            // Mock API delay
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            Alert.alert(
-                'Success',
-                'Profile updated successfully!',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => navigation.goBack(),
-                    },
-                ]
-            );
+            const response = await authService.updateUserProfile({
+                userId,
+                fullname,
+                email,
+                phoneNumber,
+                address,
+                avatarUri: selectedAvatar ?? undefined, // dùng uri nếu có ảnh mới
+            });
+            if (response?.user) {
+                const currentUser = await getUserData();
+                if (!currentUser) throw new Error('No local user data found');
+                const updatedUser = {
+                    ...currentUser,
+                    fullname: response.user.fullname,
+                    email: response.user.email,
+                    avatarURL: response.user.avatarUrl,
+                };
+                console.log('avar: ', response.user.avatarUrl)
+                await storeUserData(updatedUser);
+                setAuthState(prev => ({
+                    ...prev,
+                    user: updatedUser,
+                }));
+                Alert.alert(
+                    'Success',
+                    'Profile updated successfully!',
+                    [
+                        {
+                            text: 'OK',
+                            onPress: () => navigation.goBack(),
+                        },
+                    ]
+                );
+            }
         } catch (error) {
             Alert.alert('Error', 'Failed to update profile. Please try again.');
         } finally {
@@ -172,7 +199,7 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
                         showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
                     >
-                        <TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
                             <View>
                                 {/* Avatar Section */}
                                 <View style={[styles.avatarSection, { backgroundColor: theme.colors.surface }]}>
@@ -191,25 +218,49 @@ const EditProfileScreen: React.FC<EditProfileProps> = ({ navigation, route }) =>
                                     {userInfor?.fullname && (
                                         <View style={styles.inputGroup}>
                                             <Text style={[styles.label, { color: theme.colors.onBackground }]}>Full Name</Text>
-                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.fullname}</Text>
+                                            <TextInput
+                                                value={fullname}
+                                                onChangeText={setFullname}
+                                                style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}
+                                                placeholder="Full Name"
+                                                placeholderTextColor={theme.colors.outline}
+                                            />
                                         </View>
                                     )}
                                     {userInfor?.email && (
                                         <View style={styles.inputGroup}>
                                             <Text style={[styles.label, { color: theme.colors.onBackground }]}>Email</Text>
-                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.email}</Text>
+                                            <TextInput
+                                                value={email}
+                                                onChangeText={setEmail}
+                                                style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}
+                                                placeholder="Phone"
+                                                placeholderTextColor={theme.colors.outline}
+                                            />
                                         </View>
                                     )}
                                     {userInfor?.phonenumber && (
                                         <View style={styles.inputGroup}>
                                             <Text style={[styles.label, { color: theme.colors.onBackground }]}>Phone</Text>
-                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.phonenumber}</Text>
+                                            <TextInput
+                                                value={phoneNumber}
+                                                onChangeText={setPhoneNumber}
+                                                style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}
+                                                placeholder="Phone"
+                                                placeholderTextColor={theme.colors.outline}
+                                            />
                                         </View>
                                     )}
                                     {userInfor?.address && (
                                         <View style={styles.inputGroup}>
                                             <Text style={[styles.label, { color: theme.colors.onBackground }]}>Address</Text>
-                                            <Text style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}>{userInfor.address}</Text>
+                                            <TextInput
+                                                value={address}
+                                                onChangeText={setAddress}
+                                                style={[styles.input, { color: theme.colors.onSurface, backgroundColor: theme.colors.surface }]}
+                                                placeholder="Phone"
+                                                placeholderTextColor={theme.colors.outline}
+                                            />
                                         </View>
                                     )}
                                     {/* Nếu là giáo viên, hiển thị thông tin giáo viên readonly */}
